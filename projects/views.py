@@ -1598,7 +1598,18 @@ def quote_update_status(request, pk):
 
 @login_required
 def user_settings(request):
-    profile = request.user.profile
+    from .permissions import get_user_profile
+    from .role_permissions import ensure_system_roles
+
+    ensure_system_roles()
+    profile = get_user_profile(request.user)
+    if profile is None:
+        from .models import Role, UserProfile
+        from .permissions import ROLE_ADMIN
+
+        role = Role.by_code(ROLE_ADMIN if request.user.is_superuser else UserProfile.CODE_WORKER)
+        profile = UserProfile.objects.create(user=request.user, role=role)
+
     ui = get_ui(profile.language)
 
     if request.method == "POST":

@@ -436,7 +436,9 @@ class UserAdmin(BaseUserAdmin):
 
     @admin.display(description="Ρόλος")
     def role_display(self, obj):
-        profile = getattr(obj, "profile", None)
+        from .permissions import get_user_profile
+
+        profile = get_user_profile(obj)
         if profile and profile.role_id:
             return profile.role.name
         return "—"
