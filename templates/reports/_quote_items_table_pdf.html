@@ -1,0 +1,46 @@
+{% load quote_pdf %}
+<table class="quote-items-table" style="{{ quote_table.table_style }}">
+    <colgroup>
+        {% for col in quote_table.columns %}
+        <col style="width:{{ col.width_mm }}mm;max-width:{{ col.width_mm }}mm;">
+        {% endfor %}
+    </colgroup>
+    <thead>
+        <tr>
+            {% for col in quote_table.columns %}
+            <th class="col-{{ col.key }}" style="{% quote_pdf_cell_style col %}">{{ col.header }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in line_items %}
+        {% with row_num=forloop.counter %}
+        <tr>
+            {% for col in quote_table.columns %}
+            <td class="col-{{ col.key }}{% if col.align == 'right' %} num{% endif %}" style="{% quote_pdf_cell_style col %}">
+                {% if col.key == 'num' %}{{ row_num }}
+                {% elif col.key == 'desc' %}{{ item.description }}
+                {% elif col.key == 'cat' %}{{ item.category.label }}
+                {% elif col.key == 'qty' %}{{ item.quantity|floatformat:2 }}
+                {% elif col.key == 'unit' %}{{ item.unit.label }}
+                {% elif col.key == 'price' %}{% if item.unit_price %}{{ item.unit_price|floatformat:2 }}&nbsp;€{% else %}—{% endif %}
+                {% elif col.key == 'total' %}{% if item.unit_price %}{{ item.line_total|floatformat:2 }}&nbsp;€{% else %}—{% endif %}
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endwith %}
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr class="quote-items-table__total-row">
+            {% for col in quote_table.columns %}
+            <td class="col-{{ col.key }}{% if col.align == 'right' %} num{% endif %}" style="{% quote_pdf_cell_style col %}">
+                {% if col.key == 'price' %}<strong>Σύνολο</strong>
+                {% elif col.key == 'total' %}<strong>{{ quote.total|floatformat:2 }}&nbsp;€</strong>
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+    </tfoot>
+</table>

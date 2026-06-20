@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Έργα — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header page-header--tight">
+    <div>
+        <h1>Έργα</h1>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'projects:quote_create' %}" class="btn btn-primary">Νέα προσφορά</a>
+        <a href="{% url 'projects:project_create' %}" class="btn">Νέο έργο</a>
+    </div>
+</div>
+
+{% include "projects/_filter_bar.html" with form=filter_form %}
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Έργο</th>
+                <th>Πελάτης</th>
+                <th>Κατάσταση</th>
+                <th class="num">Έσοδα</th>
+                <th class="num">Έξοδα</th>
+                <th class="num">Ώρες</th>
+                <th class="num">Κέρδος</th>
+                <th class="col-actions">Προσφορά</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td><a href="{% url 'projects:project_detail' project.pk %}">{{ project.name }}</a></td>
+                <td>{{ project.client_name }}</td>
+                <td><span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span></td>
+                <td class="num">{{ project.total_income|floatformat:2 }} €</td>
+                <td class="num">{{ project.total_expenses|floatformat:2 }} €</td>
+                <td class="num">{{ project.total_hours|floatformat:1 }}</td>
+                <td class="num {% if project.profit < 0 %}negative{% endif %}">{{ project.profit|floatformat:2 }} €</td>
+                <td class="col-actions">
+                    <div class="table-actions">
+                    {% if project.quote %}
+                    <a href="{% url 'projects:quote_detail' project.quote.pk %}" class="table-actions__meta">{{ project.quote.quote_number }}</a>
+                    {% else %}
+                    <a href="{% url 'projects:quote_create' %}?project={{ project.pk }}" class="btn btn-sm">+ Προσφορά</a>
+                    {% endif %}
+                    {% url 'projects:project_edit' project.pk as project_edit_url %}
+                    {% include "projects/_icon_edit_link.html" with url=project_edit_url %}
+                    {% url 'projects:project_delete' project.pk as project_delete_url %}
+                    {% include "projects/_password_delete_form.html" with delete_url=project_delete_url delete_title="Διαγραφή έργου" delete_message="Θα διαγραφεί το έργο «"|add:project.name|add:"» και όλες οι καταχωρήσεις του." button_class="btn btn-danger btn-icon" next_url=request.get_full_path %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="empty">
+                    {% if filter_active %}
+                        Δεν βρέθηκαν έργα με αυτά τα κριτήρια.
+                    {% else %}
+                        Δεν υπάρχουν έργα. <a href="{% url 'projects:project_create' %}">Δημιούργησε το πρώτο</a>.
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Αναφορές — {{ month_label }}</title>
+    <style>
+        body { font-family: DejaVuSans; font-size: 12px; color: #222; }
+        h1 { font-size: 18px; }
+        h2 { font-size: 14px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        .num { text-align: right; }
+        .summary { margin-top: 20px; }
+        .summary td { border: none; padding: 4px 8px; }
+    </style>
+</head>
+<body>
+    <h1>Αναφορές — {{ month_label }}</h1>
+    <p>Ημ/νία εκτύπωσης: {{ generated_at|date:"d/m/Y H:i" }}</p>
+
+    <h2>Έσοδα έργων</h2>
+    <table>
+        <thead>
+            <tr><th>Ημερομηνία</th><th>Έργο</th><th class="num">Ποσό</th></tr>
+        </thead>
+        <tbody>
+            {% for income in month_incomes %}
+            <tr>
+                <td>{{ income.date|date:"d/m/Y" }}</td>
+                <td>{{ income.project.name }}</td>
+                <td class="num">{{ income.amount|floatformat:2 }} €</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Καμία καταχώρηση</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Έξοδα έργων</h2>
+    <table>
+        <thead>
+            <tr><th>Ημερομηνία</th><th>Έργο</th><th class="num">Ποσό</th></tr>
+        </thead>
+        <tbody>
+            {% for expense in month_project_expenses %}
+            <tr>
+                <td>{{ expense.date|date:"d/m/Y" }}</td>
+                <td>{{ expense.project.name }}</td>
+                <td class="num">{{ expense.amount|floatformat:2 }} €</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Καμία καταχώρηση</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Λειτουργικά έσοδα</h2>
+    <table>
+        <thead>
+            <tr><th>Ημερομηνία</th><th>Κατηγορία</th><th class="num">Ποσό</th></tr>
+        </thead>
+        <tbody>
+            {% for income in month_operational_incomes %}
+            <tr>
+                <td>{{ income.date|date:"d/m/Y" }}</td>
+                <td>{{ income.category.label }}</td>
+                <td class="num">{{ income.amount|floatformat:2 }} €</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Καμία καταχώρηση</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Λειτουργικά έξοδα</h2>
+    <table>
+        <thead>
+            <tr><th>Ημερομηνία</th><th>Κατηγορία</th><th class="num">Ποσό</th></tr>
+        </thead>
+        <tbody>
+            {% for expense in month_operational_expenses %}
+            <tr>
+                <td>{{ expense.date|date:"d/m/Y" }}</td>
+                <td>{{ expense.category.label }}</td>
+                <td class="num">{{ expense.amount|floatformat:2 }} €</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Καμία καταχώρηση</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="summary">
+        <tr><td><strong>Έσοδα έργων:</strong></td><td class="num">{{ total_income|floatformat:2 }} €</td></tr>
+        <tr><td><strong>Λειτουργικά έσοδα:</strong></td><td class="num">{{ total_operational_incomes|floatformat:2 }} €</td></tr>
+        <tr><td><strong>Σύνολο εσόδων:</strong></td><td class="num">{{ total_all_income|floatformat:2 }} €</td></tr>
+        <tr><td><strong>Έξοδα έργων:</strong></td><td class="num">{{ total_project_expenses|floatformat:2 }} €</td></tr>
+        <tr><td><strong>Λειτουργικά έξοδα:</strong></td><td class="num">{{ total_operational_expenses|floatformat:2 }} €</td></tr>
+        <tr><td><strong>Σύνολο εξόδων:</strong></td><td class="num">{{ total_expenses|floatformat:2 }} €</td></tr>
+        <tr><td><strong>Καθαρό αποτέλεσμα:</strong></td><td class="num">{{ total_profit|floatformat:2 }} €</td></tr>
+    </table>
+</body>
+</html>

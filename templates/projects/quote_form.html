@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} — Vibe Electrician{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/quote-form.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+<p class="subtitle">{{ subtitle|default:"Στοιχεία πελάτη, κατάσταση (πρόχειρο / απεσταλμένη) και γραμμές προσφοράς." }}</p>
+
+{% if is_create %}
+{% include "projects/_workflow_steps.html" with step=1 %}
+{% endif %}
+
+{% if formset.non_form_errors %}
+<div class="alert alert-error">{{ formset.non_form_errors }}</div>
+{% endif %}
+
+<form method="post" class="quote-form" id="quote-form">
+    {% csrf_token %}
+
+    {% include "projects/_quote_form_fields.html" %}
+
+    <section class="form-card">
+        <div class="quote-lines-header">
+            <h2>Γραμμές προσφοράς</h2>
+            <button type="button" id="add-line-btn" class="btn btn-secondary btn-sm">+ Προσθήκη γραμμής</button>
+        </div>
+
+        {{ formset.management_form }}
+        <div class="table-wrap">
+            <table class="quote-lines-table">
+                <colgroup>
+                    <col class="quote-lines-table__col-num">
+                    <col class="quote-lines-table__col-desc">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th class="col-desc">Περιγραφή</th>
+                        <th>Κατηγορία</th>
+                        <th class="num">Ποσ.</th>
+                        <th>Μον.</th>
+                        <th class="num">Τιμή μον.</th>
+                        <th class="num">Σύνολο</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="quote-lines-body">
+                    {% for line_form in formset %}
+                    <tr class="quote-line-row">
+                        {% for hidden in line_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        <td class="col-num" aria-hidden="true"></td>
+                        <td class="col-desc">{{ line_form.description }}</td>
+                        <td>{{ line_form.category }}</td>
+                        <td class="num">{{ line_form.quantity }}</td>
+                        <td>{{ line_form.unit }}</td>
+                        <td class="num">{{ line_form.unit_price }}</td>
+                        <td class="num line-total">—</td>
+                        <td class="center">
+                            {% if line_form.DELETE %}
+                            <label class="delete-line-label" title="Διαγραφή">
+                                {{ line_form.DELETE }}
+                                <span aria-hidden="true">✕</span>
+                            </label>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% if line_form.errors %}
+                    <tr><td colspan="8" class="field-error">{{ line_form.errors }}</td></tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="quote-grand-total-row">
+                        <td colspan="6" class="num"><strong>Άθροισμα γραμμών</strong></td>
+                        <td class="num"><strong id="quote-lines-subtotal">0,00 €</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="quote-total-override form-card form-card-compact">
+            <div class="form-group">
+                <label for="{{ form.manual_total.id_for_label }}">{{ form.manual_total.label }}</label>
+                {{ form.manual_total }}
+                {% if form.manual_total.errors %}<div class="field-error">{{ form.manual_total.errors.0 }}</div>{% endif %}
+            </div>
+            <p class="quote-total-preview">Τελικό σύνολο: <strong id="quote-grand-total">0,00 €</strong></p>
+        </div>
+    </section>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Αποθήκευση προσφοράς</button>
+        {% if quote %}
+        <a href="{% url 'projects:quote_detail' quote.pk %}" class="btn btn-secondary">Ακύρωση</a>
+        {% else %}
+        <a href="{% url 'projects:quote_list' %}" class="btn btn-secondary">Ακύρωση</a>
+        {% endif %}
+    </div>
+</form>
+
+<template id="quote-line-empty-template">
+    <tr class="quote-line-row">
+        {% with f=formset.empty_form %}
+        {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+        <td class="col-num" aria-hidden="true"></td>
+        <td class="col-desc">{{ f.description }}</td>
+        <td>{{ f.category }}</td>
+        <td class="num">{{ f.quantity }}</td>
+        <td>{{ f.unit }}</td>
+        <td class="num">{{ f.unit_price }}</td>
+        <td class="num line-total">—</td>
+        <td class="center">
+            {% if f.DELETE %}
+            <label class="delete-line-label" title="Διαγραφή">
+                {{ f.DELETE }}
+                <span aria-hidden="true">✕</span>
+            </label>
+            {% endif %}
+        </td>
+        {% endwith %}
+    </tr>
+</template>
+
+<script src="{% static 'js/quote_lines.js' %}"></script>
+<script src="{% static 'js/customer_picker.js' %}"></script>
+{% endblock %}

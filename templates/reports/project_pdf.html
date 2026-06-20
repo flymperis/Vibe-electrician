@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Έργο: {{ project.name }}</title>
+    <style>
+        @page { size: A4; margin: 18mm 16mm 22mm 16mm; }
+
+        body {
+            font-family: DejaVuSans;
+            font-size: 10pt;
+            color: #222;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        h1 { font-size: 16pt; margin: 0 0 4px; }
+        h2 { font-size: 11pt; margin: 0 0 8px; color: #374151; }
+
+        .meta { color: #666; margin-bottom: 16px; font-size: 9pt; }
+
+        table.data {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        table.data th,
+        table.data td {
+            border: 1px solid #ccc;
+            padding: 4px 5px;
+            text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        table.data th { background: #f0f0f0; font-size: 9pt; }
+
+        table.data .col-date { width: 14%; }
+        table.data .col-mid { width: 18%; }
+        table.data .col-amount { width: 16%; text-align: right; white-space: nowrap; font-size: 9pt; }
+        table.data .col-desc { width: 52%; }
+
+        table.summary { width: 100%; margin-top: 12px; }
+        table.summary td {
+            border: none;
+            padding: 3px 6px;
+            vertical-align: top;
+        }
+
+        table.summary .label { width: 70%; }
+        table.summary .num { width: 30%; text-align: right; white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <h1>{{ project.name }}</h1>
+    <div class="meta">
+        Πελάτης: {{ project.client_name }} |
+        Κατάσταση: {{ project.get_status_display }} |
+        Ημ/νία: {{ generated_at|date:"d/m/Y H:i" }}
+    </div>
+
+    <h2>Έσοδα</h2>
+    <table class="data">
+        <thead>
+            <tr>
+                <th class="col-date">Ημερομηνία</th>
+                <th class="col-mid">Τύπος</th>
+                <th class="col-mid">Πληρωμή</th>
+                <th class="col-amount">Ποσό</th>
+                <th class="col-desc">Περιγραφή</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for income in incomes %}
+            <tr>
+                <td class="col-date">{{ income.date|date:"d/m/Y" }}</td>
+                <td class="col-mid">{{ income.income_type.label }}</td>
+                <td class="col-mid">{{ income.payment_method.label }}</td>
+                <td class="col-amount">{{ income.amount|floatformat:2 }} €</td>
+                <td class="col-desc">{{ income.description }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Καμία καταχώρηση</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Έξοδα</h2>
+    <table class="data">
+        <thead>
+            <tr>
+                <th class="col-date">Ημερομηνία</th>
+                <th class="col-mid">Κατηγορία</th>
+                <th class="col-amount">Ποσό</th>
+                <th class="col-desc">Προμηθευτής</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td class="col-date">{{ expense.date|date:"d/m/Y" }}</td>
+                <td class="col-mid">{{ expense.category.label }}</td>
+                <td class="col-amount">{{ expense.amount|floatformat:2 }} €</td>
+                <td class="col-desc">{{ expense.supplier }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Καμία καταχώρηση</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Εργατοώρες</h2>
+    <table class="data">
+        <thead>
+            <tr>
+                <th class="col-date">Ημερομηνία</th>
+                <th class="col-mid">Εργαζόμενος</th>
+                <th class="col-amount">Ώρες</th>
+                <th class="col-desc">Περιγραφή</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in work_hours_entries %}
+            <tr>
+                <td class="col-date">{{ entry.date|date:"d/m/Y" }}</td>
+                <td class="col-mid">{{ entry.worker_display }}</td>
+                <td class="col-amount">{{ entry.hours|floatformat:1 }}</td>
+                <td class="col-desc">{{ entry.description }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Καμία καταχώρηση</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table class="summary">
+        <tr>
+            <td class="label"><strong>Σύνολο εσόδων:</strong></td>
+            <td class="num">{{ project.total_income|floatformat:2 }} €</td>
+        </tr>
+        <tr>
+            <td class="label"><strong>Σύνολο εξόδων:</strong></td>
+            <td class="num">{{ project.total_expenses|floatformat:2 }} €</td>
+        </tr>
+        <tr>
+            <td class="label"><strong>Κέρδος:</strong></td>
+            <td class="num">{{ project.profit|floatformat:2 }} €</td>
+        </tr>
+        <tr>
+            <td class="label"><strong>Σύνολο εργατοωρών:</strong></td>
+            <td class="num">{{ project.total_hours|floatformat:1 }} ωρ.</td>
+        </tr>
+    </table>
+</body>
+</html>

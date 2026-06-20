@@ -1,0 +1,36 @@
+<article class="schedule-card schedule-card--{{ schedule.status }}">
+    <div class="schedule-card__header">
+        <h3>{{ schedule.title }}</h3>
+        <span class="badge badge-{% if schedule.status == 'scheduled' %}in_progress{% elif schedule.status == 'completed' %}completed{% else %}cancelled{% endif %}">{{ schedule.get_status_display }}</span>
+    </div>
+    <dl class="schedule-card__meta">
+        <div><dt>Ώρα</dt><dd>{{ schedule.time_label }}</dd></div>
+        {% if schedule.project %}
+        <div><dt>Έργο</dt><dd><a href="{% url 'projects:project_detail' schedule.project.pk %}">{{ schedule.project.name }}</a></dd></div>
+        {% endif %}
+        {% if schedule.workers.exists %}
+        <div><dt>Εργαζόμενοι</dt><dd>{{ schedule.workers_label }}</dd></div>
+        {% endif %}
+        {% if schedule.display_location %}
+        <div><dt>Τοποθεσία</dt><dd>{{ schedule.display_location }}</dd></div>
+        {% endif %}
+    </dl>
+    {% if schedule.notes %}
+    <p class="schedule-card__notes">{{ schedule.notes }}</p>
+    {% endif %}
+    {% if can_manage_schedules %}
+    <div class="schedule-card__actions">
+        <a href="{% url 'projects:work_schedule_edit' schedule.pk %}" class="btn btn-secondary btn-sm">Επεξεργασία</a>
+        {% if schedule.status == 'scheduled' %}
+        <form method="post" action="{% url 'projects:work_schedule_complete' schedule.pk %}" class="inline-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-sm">Ολοκλήρωση</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{% url 'projects:work_schedule_delete' schedule.pk %}" class="inline-form" onsubmit="return confirm('Να διαγραφεί η εργασία «{{ schedule.title }}»;')">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Διαγραφή</button>
+        </form>
+    </div>
+    {% endif %}
+</article>

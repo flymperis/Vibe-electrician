@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <title>Προσφορά {{ quote.quote_number }}</title>
+    <style>
+        @page { size: A4; margin: 18mm 16mm 22mm 16mm; }
+
+        body {
+            font-family: DejaVuSans;
+            font-size: 10.5pt;
+            color: #1f2937;
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        .top-bar {
+            height: 4px;
+            background: #1e40af;
+            margin-bottom: 18px;
+        }
+
+        table.layout { width: 100%; border: none; margin-bottom: 22px; }
+        table.layout td { border: none; vertical-align: top; padding: 0; }
+        table.layout td.right { text-align: right; width: 42%; }
+
+        .company-logo {
+            max-height: 56px;
+            max-width: 180px;
+            margin-bottom: 8px;
+        }
+
+        .company-name {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #1e40af;
+            margin: 0 0 4px;
+        }
+
+        .company-tagline { color: #4b5563; font-size: 10pt; margin-bottom: 10px; }
+        .company-contact { font-size: 9pt; color: #6b7280; line-height: 1.6; }
+
+        .doc-label {
+            font-size: 9pt;
+            text-transform: uppercase;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .doc-title { font-size: 22pt; font-weight: bold; color: #111827; margin: 0 0 6px; }
+        .doc-number { font-size: 12pt; color: #1e40af; font-weight: bold; }
+        .doc-subtitle { margin-top: 8px; font-size: 11pt; color: #374151; }
+
+        table.quote-spec {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 9pt;
+            line-height: 1.25;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+        }
+        table.quote-spec tr {
+            border: 0;
+        }
+        table.quote-spec td {
+            padding: 4px 8px;
+            vertical-align: top;
+            border: 0 !important;
+            border-top: 0 !important;
+            border-bottom: 0 !important;
+        }
+        table.quote-spec tr:first-child td {
+            padding-top: 8px;
+        }
+        table.quote-spec tr:last-child td {
+            padding-bottom: 8px;
+        }
+        table.quote-spec .spec-label {
+            width: 18%;
+            font-size: 9pt;
+            text-transform: uppercase;
+            color: #111827;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        table.quote-spec .spec-value {
+            width: 32%;
+            color: #111827;
+        }
+
+        {% include "reports/_quote_items_table_pdf_styles.html" %}
+
+        table.notes-box {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+            border: 1px solid #000;
+            background: #fff;
+        }
+        table.notes-box td {
+            padding: 8px 10px;
+            vertical-align: top;
+            font-size: 9pt;
+            line-height: 1.4;
+            color: #1f2937;
+        }
+        table.notes-box .notes-heading,
+        table.notes-box .notes-body {
+            display: block;
+            margin: 0;
+            padding: 0;
+            text-align: left;
+            width: 100%;
+        }
+        table.notes-box .notes-heading {
+            font-weight: bold;
+            color: #111827;
+            line-height: 1.15;
+        }
+        table.notes-box .notes-body {
+            margin-top: 2px;
+            line-height: 1.35;
+            white-space: pre-line;
+        }
+
+        .terms {
+            margin-top: 18px;
+            font-size: 9pt;
+            color: #6b7280;
+            line-height: 1.55;
+        }
+
+        table.signatures { width: 100%; border: none; margin-top: 36px; }
+        table.signatures td {
+            width: 50%;
+            border: none;
+            padding-top: 28px;
+            vertical-align: top;
+        }
+        .signature-line {
+            border-top: 1px solid #9ca3af;
+            padding-top: 8px;
+            font-size: 9pt;
+            color: #4b5563;
+        }
+
+        .footer {
+            margin-top: 28px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 8pt;
+            color: #9ca3af;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar"></div>
+
+    <table class="layout">
+        <tr>
+            <td>
+                {% if company.has_logo %}
+                <img src="{{ company.logo_uri }}" class="company-logo" alt="{{ company.name }}">
+                {% endif %}
+                <div class="company-name">{{ company.name }}</div>
+                {% if company.tagline %}<div class="company-tagline">{{ company.tagline }}</div>{% endif %}
+                <div class="company-contact">
+                    {% if company.address %}{{ company.address }}<br>{% endif %}
+                    {% if company.phone %}Τηλ.: {{ company.phone }}<br>{% endif %}
+                    {% if company.email %}Email: {{ company.email }}<br>{% endif %}
+                    {% if company.vat %}ΑΦΜ: {{ company.vat }}<br>{% endif %}
+                    {% if company.website %}{{ company.website }}{% endif %}
+                </div>
+            </td>
+            <td class="right">
+                <div class="doc-label">Έγγραφο</div>
+                <h1 class="doc-title">Προσφορά</h1>
+                <div class="doc-number">{{ quote.quote_number }}</div>
+                <div class="doc-subtitle">{{ quote.title }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="quote-spec" rules="none" frame="box">
+        <tr>
+            <td class="spec-label">Πελάτης</td>
+            <td class="spec-value">{{ quote.client_name|default:"—" }}</td>
+            <td class="spec-label">Προσφορά</td>
+            <td class="spec-value">{{ quote.quote_number|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="spec-label">Οδός</td>
+            <td class="spec-value">{{ quote.address|default:"—" }}</td>
+            <td class="spec-label">Ισχύς</td>
+            <td class="spec-value">{% if quote.date %}{{ quote.date|date:"d/m/Y" }}{% if quote.valid_until %} – {{ quote.valid_until|date:"d/m/Y" }}{% endif %}{% else %}—{% endif %}</td>
+        </tr>
+        <tr>
+            <td class="spec-label">ΑΦΜ</td>
+            <td class="spec-value">{{ quote.client_vat|default:"—" }}</td>
+            <td class="spec-label">Έργο</td>
+            <td class="spec-value">{{ quote.title|default:"—" }}</td>
+        </tr>
+        <tr>
+            <td class="spec-label">Τηλέφωνο</td>
+            <td class="spec-value">{{ quote.client_phone|default:"—" }}</td>
+            <td class="spec-label"></td>
+            <td class="spec-value"></td>
+        </tr>
+        <tr>
+            <td class="spec-label">Email</td>
+            <td class="spec-value">{{ quote.client_email|default:"—" }}</td>
+            <td class="spec-label"></td>
+            <td class="spec-value"></td>
+        </tr>
+    </table>
+
+    {% include "reports/_quote_items_table_pdf.html" %}
+
+    <table class="notes-box">
+        <tr>
+            <td>
+                <div class="notes-heading">Σημειώσεις &amp; όροι</div>
+                <div class="notes-body">{{ quote.notes|default:"—" }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="terms">
+        Η παρούσα προσφορά αφορά τις εργασίες και υλικά που αναλύονται ανωτέρω.
+        Οι τιμές δεν περιλαμβάνουν ΦΠΑ, εκτός αν αναφέρεται διαφορετικά στις σημειώσεις.
+        Η προσφορά ισχύει για το χρονικό διάστημα που αναγράφεται παραπάνω.
+    </div>
+
+    <table class="signatures">
+        <tr>
+            <td><div class="signature-line">Υπογραφή &amp; σφραγίδα εταιρείας</div></td>
+            <td><div class="signature-line">Υπογραφή πελάτη (αποδοχή προσφοράς)</div></td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        {{ company.name }}{% if company.phone %} · {{ company.phone }}{% endif %}{% if company.email %} · {{ company.email }}{% endif %}
+        · Εκτύπωση {{ generated_at|date:"d/m/Y H:i" }}
+    </div>
+</body>
+</html>

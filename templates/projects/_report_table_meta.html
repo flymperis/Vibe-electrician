@@ -1,0 +1,19 @@
+{% if page_obj.paginator.count %}
+
+<p class="report-table-meta">
+
+    {{ page_obj.paginator.count }} εγγραφ{% if page_obj.paginator.count == 1 %}ή{% else %}ές{% endif %}
+
+    {% if page_obj.paginator.num_pages > 1 %}
+
+        · εμφάνιση {{ page_obj.start_index }}–{{ page_obj.end_index }}
+
+        · σελίδα {{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
+
+    {% endif %}
+
+</p>
+
+{% endif %}
+
+

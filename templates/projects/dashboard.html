@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+
+
+{% block title %}Dashboard — Vibe Electrician{% endblock %}
+
+
+
+{% block content %}
+
+<h1>Dashboard</h1>
+
+<p class="subtitle">Γρήγορες ενέργειες &amp; επισκόπηση {{ current_month_label }}</p>
+
+
+
+<div class="stats-grid stats-grid--dashboard">
+
+    <div class="stat-card stat-profit">
+
+        <div class="stat-label">Καθαρό {{ current_month_label }}</div>
+
+        <div class="stat-value {% if month_profit < 0 %}negative{% endif %}">{{ month_profit|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card stat-income">
+
+        <div class="stat-label">Έσοδα μήνα</div>
+
+        <div class="stat-value">{{ month_total_income|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card stat-expense">
+
+        <div class="stat-label">Έξοδα μήνα</div>
+
+        <div class="stat-value">{{ month_total_expenses|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card">
+
+        <div class="stat-label">Ενεργά έργα</div>
+
+        <div class="stat-value stat-value-sm">
+
+            <a href="{% url 'projects:project_list' %}">{{ active_projects_count }}</a>
+
+        </div>
+
+    </div>
+
+    {% if pending_quotes_count %}
+
+    <div class="stat-card">
+
+        <div class="stat-label">Ανοιχτές προσφορές</div>
+
+        <div class="stat-value stat-value-sm">
+
+            <a href="{% url 'projects:quote_list' %}?status=draft">{{ pending_quotes_count }}</a>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    {% if today_schedule_count %}
+
+    <div class="stat-card">
+
+        <div class="stat-label">Εργασίες σήμερα</div>
+
+        <div class="stat-value stat-value-sm">
+
+            <a href="{% url 'projects:work_calendar' %}?year={{ today.year }}&month={{ today.month }}&day={{ today|date:'Y-m-d' }}">{{ today_schedule_count }}</a>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+
+<section class="dashboard-section">
+
+    <h2>Γρήγορη καταχώρηση</h2>
+
+    <div class="dashboard-tiles dashboard-tiles--quick">
+
+        <a href="{% url 'projects:operational_expenses' %}#operational-income-form" class="dashboard-tile dashboard-tile--featured dashboard-tile--income">
+
+            <span class="dashboard-tile__icon" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M12 5v14M5 12h14"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__body">
+
+                <span class="dashboard-tile__label">Λειτουργικό έσοδο</span>
+
+                <span class="dashboard-tile__hint">Έσοδο εταιρείας, χωρίς έργο</span>
+
+            </span>
+
+        </a>
+
+        <a href="{% url 'projects:operational_expenses' %}#operational-expense-form" class="dashboard-tile dashboard-tile--featured dashboard-tile--expense">
+
+            <span class="dashboard-tile__icon" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M5 12h14"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__body">
+
+                <span class="dashboard-tile__label">Λειτουργικό έξοδο</span>
+
+                <span class="dashboard-tile__hint">Έξοδο εταιρείας, χωρίς έργο</span>
+
+            </span>
+
+        </a>
+
+        <a href="{% url 'projects:project_list' %}" class="dashboard-tile dashboard-tile--featured dashboard-tile--income-soft">
+
+            <span class="dashboard-tile__icon" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M12 5v14M5 12h14"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__body">
+
+                <span class="dashboard-tile__label">Έσοδο έργου</span>
+
+                <span class="dashboard-tile__hint">Άνοιξε έργο → καταχώρηση εσόδου</span>
+
+            </span>
+
+        </a>
+
+        <a href="{% url 'projects:add_project_expense' %}" class="dashboard-tile dashboard-tile--featured dashboard-tile--expense-soft">
+
+            <span class="dashboard-tile__icon" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M19 12H5"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__body">
+
+                <span class="dashboard-tile__label">Έξοδο έργου</span>
+
+                <span class="dashboard-tile__hint">Υλικά, εργασία κ.ά. σε έργο</span>
+
+            </span>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+
+<section class="dashboard-section">
+
+    <h2>Μετάβαση</h2>
+
+    <div class="dashboard-tiles">
+
+        <a href="{% url 'projects:project_list' %}" class="dashboard-tile">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M3 9.5 12 4l9 5.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Έργα</span>
+
+        </a>
+
+        <a href="{% url 'projects:work_calendar' %}" class="dashboard-tile">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+
+                    <path d="M16 2v4M8 2v4M3 10h18"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Ημερολόγιο</span>
+
+        </a>
+
+        <a href="{% url 'projects:quote_list' %}" class="dashboard-tile">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>
+
+                    <path d="M14 2v6h6M8 13h8M8 17h8M8 9h2"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Προσφορές</span>
+
+        </a>
+
+        <a href="{% url 'projects:customer_list' %}" class="dashboard-tile">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+
+                    <circle cx="9" cy="7" r="4"/>
+
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Πελάτες</span>
+
+        </a>
+
+        <a href="{% url 'projects:operational_expenses' %}" class="dashboard-tile">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Λειτουργικά</span>
+
+        </a>
+
+        <a href="{% url 'projects:monthly_report' %}" class="dashboard-tile">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M3 3v18h18"/>
+
+                    <path d="M7 16l4-4 4 4 5-6"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Αναφορές</span>
+
+        </a>
+
+        <a href="{% url 'projects:project_create' %}" class="dashboard-tile dashboard-tile--accent">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M12 5v14M5 12h14"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Νέο έργο</span>
+
+        </a>
+
+        <a href="{% url 'projects:quote_create' %}" class="dashboard-tile dashboard-tile--accent">
+
+            <span class="dashboard-tile__icon dashboard-tile__icon--sm" aria-hidden="true">
+
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+
+                    <path d="M12 5v14M5 12h14"/>
+
+                </svg>
+
+            </span>
+
+            <span class="dashboard-tile__label">Νέα προσφορά</span>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+
+{% if today_schedules %}
+
+<section class="dashboard-section">
+
+    <div class="page-header page-header--tight">
+
+        <h2>Σημερινές εργασίες</h2>
+
+        <div class="page-actions">
+
+            <a href="{% url 'projects:work_calendar' %}?year={{ today.year }}&month={{ today.month }}&day={{ today|date:'Y-m-d' }}" class="btn btn-secondary btn-sm">Ημερολόγιο</a>
+
+        </div>
+
+    </div>
+
+    <div class="schedule-list schedule-list--compact">
+
+        {% for schedule in today_schedules %}
+
+        {% include "projects/_work_schedule_card.html" with schedule=schedule %}
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
+{% endblock %}
+
+

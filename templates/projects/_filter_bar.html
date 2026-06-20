@@ -1,0 +1,50 @@
+<form method="get" class="filter-bar{% if filter_bar_class %} {{ filter_bar_class }}{% endif %}">
+    {% if form.errors %}
+    <div class="filter-bar-errors alert alert-error">
+        Διόρθωσε τις ημερομηνίες φίλτρου πριν την εφαρμογή.
+    </div>
+    {% endif %}
+    {% for field in form %}
+        {% if field.name == 'status' and field.field.widget.attrs.class == 'status-checkboxes' %}
+        <label class="filter-field filter-field-status{% if field.errors %} filter-field-invalid{% endif %}">
+            {{ field.label }}
+            <details class="filter-dropdown"{% if field.value %} open{% endif %}>
+                <summary class="filter-dropdown__toggle">
+                    {% if not field.value %}
+                        Όλες
+                    {% elif field.value|length == 1 %}
+                        {% for value, label in field.field.choices %}
+                            {% if value in field.value %}{{ label }}{% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {{ field.value|length }} επιλεγμένες
+                    {% endif %}
+                </summary>
+                <div class="filter-dropdown__menu">
+                    {{ field }}
+                </div>
+            </details>
+            {% for error in field.errors %}
+            <span class="field-error">{{ error }}</span>
+            {% endfor %}
+        </label>
+        {% else %}
+        <label class="filter-field{% if field.name == 'q' %} filter-field-wide{% endif %}{% if field.name == 'date_from' or field.name == 'date_to' %} filter-field-date{% endif %}{% if field.errors %} filter-field-invalid{% endif %}">
+            {{ field.label }}
+            {{ field }}
+            {% for error in field.errors %}
+            <span class="field-error">{{ error }}</span>
+            {% endfor %}
+        </label>
+        {% endif %}
+    {% endfor %}
+    <div class="filter-actions">
+        <button type="submit" class="btn btn-primary btn-sm">Εφαρμογή</button>
+        {% if clear_url %}
+        <a href="{{ clear_url }}" class="btn btn-secondary btn-sm">Καθαρισμός</a>
+        {% endif %}
+    </div>
+</form>
+{% if result_count is not None %}
+<p class="filter-meta">{{ result_count }} αποτέλεσμα{% if result_count != 1 %}τα{% endif %}{% if filter_active %} — ενεργά φίλτρα{% endif %}</p>
+{% endif %}

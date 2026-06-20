@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Πελάτες — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header page-header--tight">
+    <div>
+        <h1>Πελάτες</h1>
+        <p class="subtitle">Πελατολόγιο — κεντρική λίστα πελατών</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'projects:customer_create' %}" class="btn btn-primary">Νέος πελάτης</a>
+    </div>
+</div>
+
+{% include "projects/_filter_bar.html" with form=filter_form clear_url=clear_url %}
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Όνομα / Επωνυμία</th>
+                <th>ΑΦΜ</th>
+                <th>Τηλέφωνο</th>
+                <th>Email</th>
+                <th>Διεύθυνση</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+            <tr{% if not customer.is_active %} class="row-inactive"{% endif %}>
+                <td>
+                    <a href="{% url 'projects:customer_detail' customer.pk %}">{{ customer.name }}</a>
+                    {% if not customer.is_active %}
+                    <span class="badge badge-cancelled">Ανενεργός</span>
+                    {% endif %}
+                </td>
+                <td>{{ customer.vat|default:"—" }}</td>
+                <td>{{ customer.phone|default:"—" }}</td>
+                <td>
+                    {% if customer.email %}
+                    <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
+                    {% else %}—{% endif %}
+                </td>
+                <td>{{ customer.address|default:"—" }}</td>
+                <td class="col-actions">
+                    <div class="table-actions">
+                        <a href="{% url 'projects:quote_create' %}?customer={{ customer.pk }}" class="btn btn-secondary btn-sm">Προσφορά</a>
+                        <a href="{% url 'projects:customer_edit' customer.pk %}" class="btn btn-secondary btn-sm">Επεξεργασία</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="empty">Δεν βρέθηκαν πελάτες</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p class="form-hint">{{ result_count }} πελάτες</p>
+{% endblock %}

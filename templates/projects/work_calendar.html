@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Ημερολόγιο εργασιών — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Ημερολόγιο εργασιών</h1>
+        <p class="subtitle">{{ period.month_label }}</p>
+    </div>
+    <div class="page-actions">
+        {% if can_manage_schedules %}
+        <a href="{% url 'projects:work_schedule_create' %}?day={{ selected_date|date:'Y-m-d' }}" class="btn btn-primary">Νέα εργασία</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="calendar-toolbar">
+    <a href="{{ prev_url }}" class="btn btn-secondary btn-sm">← Προηγούμενος</a>
+    <a href="{{ today_url }}" class="btn btn-secondary btn-sm">Σήμερα</a>
+    <a href="{{ next_url }}" class="btn btn-secondary btn-sm">Επόμενος →</a>
+</div>
+
+<form method="get" class="filter-bar filter-bar--many">
+    <input type="hidden" name="year" value="{{ period.year }}">
+    <input type="hidden" name="month" value="{{ period.month }}">
+    {% if selected_date %}
+    <input type="hidden" name="day" value="{{ selected_date|date:'Y-m-d' }}">
+    {% endif %}
+    {% for field in filter_form %}
+    <label class="filter-field{% if field.name == 'q' %} filter-field-wide{% endif %}">
+        {{ field.label }}
+        {{ field }}
+    </label>
+    {% endfor %}
+    <div class="filter-actions">
+        <button type="submit" class="btn btn-primary btn-sm">Εφαρμογή</button>
+        {% if filter_active %}
+        <a href="{% url 'projects:work_calendar' %}?year={{ period.year }}&month={{ period.month }}{% if selected_date %}&day={{ selected_date|date:'Y-m-d' }}{% endif %}" class="btn btn-secondary btn-sm">Καθαρισμός</a>
+        {% endif %}
+    </div>
+</form>
+
+{% if today_schedules %}
+<div class="calendar-today-banner">
+    <strong>Σήμερα:</strong>
+    {% for schedule in today_schedules %}
+        {% include "projects/_work_schedule_chip.html" with schedule=schedule link=True %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="calendar-grid-wrap">
+    <div class="calendar-grid">
+        {% for label in weekday_labels %}
+        <div class="calendar-weekday">{{ label }}</div>
+        {% endfor %}
+        {% for week in calendar_weeks %}
+            {% for day in week %}
+            <a href="{{ day.url }}" class="calendar-day{% if not day.in_month %} calendar-day--muted{% endif %}{% if day.is_today %} calendar-day--today{% endif %}{% if day.is_selected %} calendar-day--selected{% endif %}">
+                <span class="calendar-day__number">{{ day.date.day }}</span>
+                <div class="calendar-day__events">
+                    {% for schedule in day.schedules %}
+                    <span class="calendar-event calendar-event--color-{{ schedule.calendar_color_index }} calendar-event--{{ schedule.status }}">
+                        {{ schedule.title|truncatechars:22 }}
+                    </span>
+                    {% endfor %}
+                    {% if day.extra_count %}
+                    <span class="calendar-event calendar-event--more">+{{ day.extra_count }}</span>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+{% if selected_date %}
+<section class="calendar-day-panel">
+    <div class="page-header page-header--tight">
+        <h2>{{ selected_date|date:"d/m/Y" }}</h2>
+        <div class="page-actions">
+            {% if can_manage_schedules %}
+            <a href="{% url 'projects:work_schedule_create' %}?day={{ selected_date|date:'Y-m-d' }}" class="btn btn-sm">Προσθήκη</a>
+            {% endif %}
+        </div>
+    </div>
+    {% if day_schedules %}
+    <div class="schedule-list">
+        {% for schedule in day_schedules %}
+        {% include "projects/_work_schedule_card.html" with schedule=schedule %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-inline">Καμία εργασία αυτή την ημέρα.</p>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}

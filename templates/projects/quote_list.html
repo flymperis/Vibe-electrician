@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Προσφορές — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Προσφορές</h1>
+        <p class="subtitle">Προσφορά → αποδοχή πελάτη → δημιουργία έργου → διαχείριση από το έργο</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'projects:quote_create' %}" class="btn btn-primary">Νέα προσφορά</a>
+    </div>
+</div>
+
+{% include "projects/_filter_bar.html" with form=filter_form %}
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th class="col-nowrap">Αρ.</th>
+                <th>Τίτλος</th>
+                <th>Έργο</th>
+                <th>Πελάτης</th>
+                <th>Ημερομηνία</th>
+                <th>Κατάσταση</th>
+                <th class="num">Σύνολο</th>
+                <th class="col-actions"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quote in quotes %}
+            <tr>
+                <td class="col-nowrap"><a href="{% url 'projects:quote_detail' quote.pk %}">{{ quote.quote_number }}</a></td>
+                <td>{{ quote.title }}</td>
+                <td>
+                    {% if quote.project %}
+                    <a href="{% url 'projects:project_detail' quote.project.pk %}">{{ quote.project.name }}</a>
+                    {% else %}
+                    —
+                    {% endif %}
+                </td>
+                <td>{{ quote.client_name }}</td>
+                <td>{{ quote.date|date:"d/m/Y" }}</td>
+                <td><span class="badge badge-{{ quote.status }}">{{ quote.get_status_display }}</span></td>
+                <td class="num">{{ quote.total|floatformat:2 }} €</td>
+                <td class="col-actions">
+                    <div class="table-actions">
+                    {% if quote.can_be_deleted %}
+                    {% url 'projects:quote_edit' quote.pk as quote_edit_url %}
+                    {% include "projects/_icon_edit_link.html" with url=quote_edit_url %}
+                    {% url 'projects:quote_delete' quote.pk as quote_delete_url %}
+                    {% include "projects/_password_delete_form.html" with delete_url=quote_delete_url delete_title="Διαγραφή προσφοράς" delete_message="Θα διαγραφεί η προσφορά "|add:quote.quote_number|add:"." button_class="btn btn-danger btn-icon" next_url=request.get_full_path %}
+                    {% else %}
+                    <a href="{% url 'projects:quote_detail' quote.pk %}" class="btn btn-sm">Προβολή</a>
+                    {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="empty">
+                    {% if filter_active %}
+                        Δεν βρέθηκαν προσφορές.
+                    {% else %}
+                        Δεν υπάρχουν προσφορές. <a href="{% url 'projects:quote_create' %}">Δημιούργησε την πρώτη</a>.
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

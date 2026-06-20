@@ -1,0 +1,20 @@
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Σελιδοποίηση">
+    {% if pagination.previous %}
+    <a href="{{ pagination.previous }}" class="btn btn-secondary btn-sm">← Προηγούμενη</a>
+    {% else %}
+    <span class="btn btn-secondary btn-sm pagination__disabled">← Προηγούμενη</span>
+    {% endif %}
+
+    <span class="pagination__info">
+        {{ page_obj.start_index }}–{{ page_obj.end_index }} από {{ page_obj.paginator.count }}
+        · Σελ. {{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if pagination.next %}
+    <a href="{{ pagination.next }}" class="btn btn-secondary btn-sm">Επόμενη →</a>
+    {% else %}
+    <span class="btn btn-secondary btn-sm pagination__disabled">Επόμενη →</span>
+    {% endif %}
+</nav>
+{% endif %}

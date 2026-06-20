@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+
+
+{% block title %}Αναφορές — Vibe Electrician{% endblock %}
+
+
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <h1>Αναφορές</h1>
+
+        <p class="subtitle">{{ month_label }}</p>
+
+    </div>
+
+    <div class="page-actions">
+
+        <a href="{% url 'reports:monthly_excel' %}?year={{ year }}&month={{ month_param }}" class="btn">Excel</a>
+
+        <a href="{% url 'reports:monthly_pdf' %}?year={{ year }}&month={{ month_param }}" class="btn">PDF</a>
+
+    </div>
+
+</div>
+
+
+
+<form method="get" class="filter-bar">
+
+    <label class="filter-field">
+
+        Έτος
+
+        <select name="year">
+
+            {% for y in years %}
+
+            <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+
+            {% endfor %}
+
+        </select>
+
+    </label>
+
+    <label class="filter-field">
+
+        Μήνας
+
+        <select name="month">
+
+            <option value="all" {% if month == "all" %}selected{% endif %}>Όλα (ολόκληρο το έτος)</option>
+
+            {% for m, name in month_options %}
+
+            <option value="{{ m }}" {% if month == m %}selected{% endif %}>{{ name }}</option>
+
+            {% endfor %}
+
+        </select>
+
+    </label>
+
+    <label class="filter-field filter-field-wide">
+
+        Έργο
+
+        <select name="project">
+
+            <option value="">Όλα τα έργα</option>
+
+            {% for p in projects %}
+
+            <option value="{{ p.pk }}" {% if selected_project == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+
+            {% endfor %}
+
+        </select>
+
+    </label>
+
+    <label class="filter-field filter-field-wide">
+
+        Αναζήτηση
+
+        <input type="text" name="q" value="{{ search_q }}" placeholder="Έργο, περιγραφή, προμηθευτής…">
+
+    </label>
+
+    <div class="filter-actions">
+
+        <button type="submit" class="btn btn-primary btn-sm">Εφαρμογή</button>
+
+        {% if filter_active %}
+
+        <a href="{{ clear_url }}" class="btn btn-secondary btn-sm">Καθαρισμός</a>
+
+        {% endif %}
+
+    </div>
+
+</form>
+
+
+
+<div class="stats-grid">
+
+    <div class="stat-card stat-income">
+
+        <div class="stat-label">Έσοδα έργων</div>
+
+        <div class="stat-value">{{ total_income|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card stat-income">
+
+        <div class="stat-label">Λειτουργικά έσοδα</div>
+
+        <div class="stat-value">{{ total_operational_incomes|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card stat-expense">
+
+        <div class="stat-label">Έξοδα έργων</div>
+
+        <div class="stat-value">{{ total_project_expenses|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card stat-expense">
+
+        <div class="stat-label">Λειτουργικά έξοδα</div>
+
+        <div class="stat-value">{{ total_operational_expenses|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card stat-profit">
+
+        <div class="stat-label">Καθαρό αποτέλεσμα</div>
+
+        <div class="stat-value {% if total_profit < 0 %}negative{% endif %}">{{ total_profit|floatformat:2 }} €</div>
+
+    </div>
+
+</div>
+
+
+
+{% if trend_data %}
+
+<h2>{% if is_full_year %}Σύνοψη ανά μήνα ({{ year }}){% else %}Τελευταίοι 6 μήνες{% endif %}</h2>
+
+<div class="table-wrap">
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Μήνας</th>
+
+                <th class="num">Έσοδα έργων</th>
+
+                <th class="num">Λειτ. έσοδα</th>
+
+                <th class="num">Έξοδα έργων</th>
+
+                <th class="num">Λειτ. έξοδα</th>
+
+                <th class="num">Καθαρό</th>
+
+                <th class="num">Κέρδος %</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for row in trend_data %}
+
+            <tr>
+
+                <td>{{ row.label }}</td>
+
+                <td class="num">{{ row.income|floatformat:2 }} €</td>
+
+                <td class="num">{{ row.operational_incomes|floatformat:2 }} €</td>
+
+                <td class="num">{{ row.project_expenses|floatformat:2 }} €</td>
+
+                <td class="num">{{ row.operational_expenses|floatformat:2 }} €</td>
+
+                <td class="num {% if row.profit < 0 %}negative{% endif %}">{{ row.profit|floatformat:2 }} €</td>
+
+                <td class="num {% if row.margin is not None and row.margin < 0 %}negative{% endif %}">
+
+                    {% if row.margin is not None %}{{ row.margin|floatformat:1 }}%{% else %}—{% endif %}
+
+                </td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% else %}
+
+<p class="empty-inline">Δεν βρέθηκαν δεδομένα για την επιλεγμένη περίοδο.</p>
+
+{% endif %}
+
+{% endblock %}
+
+

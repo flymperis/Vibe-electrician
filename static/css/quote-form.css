@@ -1,0 +1,305 @@
+/* Φόρμα προσφοράς (create/edit) — ΜΟΝΟ quote_form.html. Δεν επηρεάζει detail/PDF. */
+
+.quote-form .quote-form-section {
+    margin-bottom: 0.75rem;
+    padding: 1rem 1.1rem;
+}
+
+.quote-form .quote-form-section__title {
+    margin: 0 0 0.65rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.quote-form .quote-form-section:has(+ .form-card) {
+    margin-bottom: 1.35rem;
+}
+
+.quote-form .quote-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem 0.85rem;
+}
+
+@media (max-width: 768px) {
+    .quote-form .quote-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.quote-form .quote-spec--form {
+    margin-bottom: 0;
+}
+
+.quote-form .quote-spec--form .quote-spec__label {
+    align-self: center;
+    cursor: pointer;
+}
+
+.quote-form .quote-spec--form .quote-spec__line--wide .quote-spec__label {
+    align-self: start;
+    padding-top: 0.4rem;
+}
+
+.quote-form .quote-spec--form .quote-spec__field {
+    min-width: 0;
+}
+
+.quote-form .quote-spec--form .quote-spec__field input,
+.quote-form .quote-spec--form .quote-spec__field select,
+.quote-form .quote-spec--form .quote-spec__field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.86rem;
+    font-family: inherit;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.quote-form .quote-spec--form .quote-spec__field .field-error {
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+}
+
+.quote-form .quote-lines-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.quote-form .quote-lines-header h2 {
+    margin: 0;
+}
+
+.quote-form .delete-line-label {
+    cursor: pointer;
+    color: var(--danger, #dc2626);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.quote-form .delete-line-label input {
+    display: none;
+}
+
+.quote-form .quote-line-row.line-deleted {
+    opacity: 0.45;
+}
+
+/* Απόσταση # → περιγραφή στη φόρμα: padding-left 10px στο .col-desc */
+
+.quote-form .quote-lines-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.quote-form .quote-lines-table__col-num {
+    width: 2.75rem;
+    min-width: 2.75rem;
+}
+
+.quote-form .quote-lines-table tbody {
+    counter-reset: quote-line-num;
+}
+
+.quote-form .quote-lines-table tbody tr.quote-line-row {
+    counter-increment: quote-line-num;
+}
+
+.quote-form .quote-lines-table td.col-num::before {
+    content: counter(quote-line-num);
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.quote-form .quote-lines-table th,
+.quote-form .quote-lines-table td {
+    padding: 0.5rem 0.65rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.quote-form .quote-lines-table th.col-num,
+.quote-form .quote-lines-table td.col-num {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    padding: 0.5rem 0 0.5rem 0.35rem;
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: middle;
+    font-variant-numeric: tabular-nums;
+}
+
+.quote-form .quote-lines-table th.col-desc,
+.quote-form .quote-lines-table td.col-desc {
+    padding: 0.5rem 0.65rem 0.5rem 10px;
+    margin-left: 0;
+}
+
+.quote-form .quote-lines-table thead th {
+    background: var(--surface-muted);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+}
+
+.quote-form .quote-lines-table tfoot td {
+    padding: 0.35rem 0.65rem;
+    background: var(--table-foot-bg);
+    border-top: 2px solid var(--border);
+    line-height: 1.25;
+}
+
+.quote-form .quote-grand-total-row td {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+}
+
+.quote-form .quote-grand-total-row #quote-grand-total {
+    font-size: 0.95rem;
+}
+
+.quote-form .quote-lines-table input,
+.quote-form .quote-lines-table select {
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.quote-form .quote-lines-table td.num {
+    text-align: right;
+}
+
+.quote-form .quote-lines-table td.num input {
+    text-align: right;
+}
+
+.quote-form .quote-lines-table td.center {
+    text-align: center;
+}
+
+.quote-form .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.quote-form .quote-total-override {
+    margin-top: 1rem;
+    max-width: 24rem;
+}
+
+.quote-form .quote-total-preview {
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+}
+
+.quote-form .quote-customer-picker {
+    margin-bottom: 1rem;
+}
+
+.quote-form .quote-customer-picker__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.quote-form .customer-picker {
+    position: relative;
+    flex: 1 1 14rem;
+    min-width: 12rem;
+}
+
+.quote-form .customer-picker__search-area {
+    position: relative;
+}
+
+.quote-form .customer-picker__search {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+.quote-form .customer-picker__results {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.25rem);
+    margin: 0;
+    padding: 0.25rem 0;
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    max-height: 14rem;
+    overflow-y: auto;
+}
+
+.quote-form .customer-picker__result {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.quote-form .customer-picker__result:hover,
+.quote-form .customer-picker__result.is-active {
+    background: var(--surface-muted);
+}
+
+.quote-form .customer-picker__results-empty {
+    padding: 0.5rem 0.75rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.quote-form .customer-picker__selected {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.quote-form .customer-picker__selected-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

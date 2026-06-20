@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Προσφορά σε υπάρχον έργο — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Προσφορά σε υπάρχον έργο</h1>
+        <p class="subtitle">Για έργα που δημιουργήθηκαν χωρίς προσφορά</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'projects:quote_create' %}" class="btn btn-primary">+ Νέα προσφορά (νέος πελάτης)</a>
+    </div>
+</div>
+
+{% if projects %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Έργο</th>
+                <th>Πελάτης</th>
+                <th>Διεύθυνση</th>
+                <th>Κατάσταση</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td><strong>{{ project.name }}</strong></td>
+                <td>{{ project.client_name }}</td>
+                <td>{{ project.address|default:"—" }}</td>
+                <td><span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span></td>
+                <td>
+                    <a href="{% url 'projects:quote_create' %}?project={{ project.pk }}" class="btn btn-primary btn-sm">
+                        Δημιουργία προσφοράς
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="form-card">
+    <p>Όλα τα έργα έχουν ήδη προσφορά.</p>
+    <p class="form-hint">
+        <a href="{% url 'projects:quote_create' %}">Νέα προσφορά για νέο πελάτη</a>
+    </p>
+</div>
+{% endif %}
+
+<p><a href="{% url 'projects:quote_list' %}">← Πίσω στις προσφορές</a></p>
+{% endblock %}

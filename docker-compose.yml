@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "false"
+      DATABASE_PATH: /app/data/db.sqlite3
+      MEDIA_ROOT: /app/data/media
+    restart: unless-stopped

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — Vibe Electrician{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+{% if project %}
+<p class="subtitle">Ενημέρωση στοιχείων, κατάστασης και ημερομηνιών έργου</p>
+{% elif subtitle %}
+<p class="subtitle">{{ subtitle }}</p>
+{% else %}
+<p class="subtitle">Ενημέρωση στοιχείων έργου</p>
+{% endif %}
+
+<div class="form-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            {% for field in form %}
+            <div class="form-group{% if field.name == 'notes' %} form-group-full{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="field-error">{{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+            {% if project %}
+            <a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-secondary">Ακύρωση</a>
+            {% else %}
+            <a href="{% url 'projects:project_list' %}" class="btn btn-secondary">Ακύρωση</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock %}

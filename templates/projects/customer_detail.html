@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }} — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ customer.name }}</h1>
+        {% if not customer.is_active %}
+        <p class="subtitle"><span class="badge badge-cancelled">Ανενεργός</span></p>
+        {% endif %}
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'projects:quote_create' %}?customer={{ customer.pk }}" class="btn btn-primary">Νέα προσφορά</a>
+        <a href="{% url 'projects:customer_edit' customer.pk %}" class="btn btn-secondary">Επεξεργασία</a>
+        {% if customer.is_active %}
+        <form method="post" action="{% url 'projects:customer_deactivate' customer.pk %}" class="inline-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Να απενεργοποιηθεί ο πελάτης «{{ customer.name }}»;')">Απενεργοποίηση</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="project-meta form-card">
+    <div class="project-meta-grid">
+        <div><span class="meta-label">ΑΦΜ</span> {{ customer.vat|default:"—" }}</div>
+        <div><span class="meta-label">Τηλέφωνο</span> {{ customer.phone|default:"—" }}</div>
+        <div><span class="meta-label">Email</span>
+            {% if customer.email %}<a href="mailto:{{ customer.email }}">{{ customer.email }}</a>{% else %}—{% endif %}
+        </div>
+        <div><span class="meta-label">Διεύθυνση</span> {{ customer.address|default:"—" }}</div>
+        {% if customer.notes %}
+        <div class="project-meta-notes"><span class="meta-label">Σημειώσεις</span> {{ customer.notes|linebreaksbr }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<h2>Προσφορές</h2>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Αρ.</th>
+                <th>Τίτλος</th>
+                <th>Ημερομηνία</th>
+                <th>Κατάσταση</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quote in quotes %}
+            <tr>
+                <td>{{ quote.quote_number }}</td>
+                <td>{{ quote.title }}</td>
+                <td>{{ quote.date|date:"d/m/Y" }}</td>
+                <td><span class="badge badge-{{ quote.status }}">{{ quote.get_status_display }}</span></td>
+                <td><a href="{% url 'projects:quote_detail' quote.pk %}" class="btn btn-sm btn-secondary">Προβολή</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="empty">Καμία προσφορά</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2>Έργα</h2>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Έργο</th>
+                <th>Κατάσταση</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>{{ project.name }}</td>
+                <td><span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span></td>
+                <td><a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-sm btn-secondary">Άνοιγμα</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="empty">Κανένα έργο</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p><a href="{% url 'projects:customer_list' %}">← Πίσω στους Πελάτες</a></p>
+{% endblock %}

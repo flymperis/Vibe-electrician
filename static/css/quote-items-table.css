@@ -1,0 +1,107 @@
+/* Πίνακας γραμμών προσφοράς — μόνο web (quote detail / preview) */
+
+.quote-items-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+.quote-items-table__col-num { width: 4%; min-width: 2.75rem; }
+.quote-items-table__col-desc { width: 33%; }
+.quote-items-table__col-cat { width: 13%; }
+.quote-items-table__col-qty { width: 11%; }
+.quote-items-table__col-unit { width: 9%; }
+.quote-items-table__col-price { width: 15%; }
+.quote-items-table__col-total { width: 15%; }
+
+.quote-items-table thead th {
+    background-color: var(--surface-muted);
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid var(--border);
+    border-left: none;
+    border-right: none;
+    vertical-align: middle;
+}
+
+.quote-items-table tbody td,
+.quote-items-table tfoot td {
+    padding: 0.6rem 0.65rem;
+    border-bottom: 1px solid var(--border);
+    border-left: none;
+    border-right: none;
+    vertical-align: middle;
+    color: var(--text);
+}
+
+.quote-items-table tbody tr:last-child td {
+    border-bottom: 1px solid var(--border);
+}
+
+.quote-items-table tfoot td {
+    border-bottom: none;
+    background-color: var(--surface-muted);
+}
+
+.quote-items-table__total-row td {
+    padding-top: 0.55rem;
+    padding-bottom: 0.35rem;
+    vertical-align: middle;
+    line-height: 1.25;
+}
+
+.quote-items-table thead th.col-num,
+.quote-items-table tbody td.col-num,
+.quote-items-table tfoot td.col-num {
+    padding: 0.6rem 0 0.6rem 0.35rem;
+    text-align: left;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.quote-items-table thead th.col-desc,
+.quote-items-table tbody td.col-desc,
+.quote-items-table tfoot td.col-desc {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+    padding-right: 0.5rem;
+    padding-left: 10px;
+    margin-left: 0;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.quote-items-table .col-cat {
+    text-align: left;
+    white-space: nowrap;
+}
+
+.quote-items-table .col-qty {
+    padding-left: 0.85rem;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.quote-items-table .col-unit {
+    text-align: left;
+    white-space: nowrap;
+}
+
+.quote-items-table .col-price,
+.quote-items-table .col-total {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.quote-preview .table-wrap--quote-items {
+    margin-top: 0.35rem;
+}

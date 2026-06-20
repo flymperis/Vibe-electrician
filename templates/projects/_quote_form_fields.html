@@ -1,0 +1,80 @@
+{% comment %}
+Renders quote form fields in grouped sections.
+Expects: form (QuoteForm)
+{% endcomment %}
+
+<section class="form-card quote-form-section">
+    <h2 class="quote-form-section__title">Πελάτης</h2>
+    <div class="quote-customer-picker">
+        {% include "projects/_customer_picker.html" %}
+        <p class="form-hint">Τα παρακάτω στοιχεία αποθηκεύονται στην προσφορά (snapshot). Μπορείς να τα προσαρμόσεις ανά έργο.</p>
+    </div>
+    <div class="quote-spec quote-spec--form">
+        <div class="quote-spec__line quote-spec__line--wide">
+            <label class="quote-spec__label" for="{{ form.client_name.id_for_label }}">Πελάτης</label>
+            <div class="quote-spec__field">
+                {{ form.client_name }}
+                {% if form.client_name.errors %}<div class="field-error">{{ form.client_name.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="quote-spec__line quote-spec__line--wide">
+            <label class="quote-spec__label" for="{{ form.address.id_for_label }}">Οδός</label>
+            <div class="quote-spec__field">
+                {{ form.address }}
+                {% if form.address.errors %}<div class="field-error">{{ form.address.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="quote-spec__line">
+            <label class="quote-spec__label" for="{{ form.client_phone.id_for_label }}">Τηλέφωνο</label>
+            <div class="quote-spec__field">
+                {{ form.client_phone }}
+                {% if form.client_phone.errors %}<div class="field-error">{{ form.client_phone.errors.0 }}</div>{% endif %}
+            </div>
+            <label class="quote-spec__label" for="{{ form.client_vat.id_for_label }}">ΑΦΜ</label>
+            <div class="quote-spec__field">
+                {{ form.client_vat }}
+                {% if form.client_vat.errors %}<div class="field-error">{{ form.client_vat.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="quote-spec__line quote-spec__line--wide">
+            <label class="quote-spec__label" for="{{ form.client_email.id_for_label }}">Email</label>
+            <div class="quote-spec__field">
+                {{ form.client_email }}
+                {% if form.client_email.errors %}<div class="field-error">{{ form.client_email.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="form-card quote-form-section">
+    <h2 class="quote-form-section__title">Στοιχεία προσφοράς</h2>
+    <div class="quote-form-grid">
+        <div class="form-group form-group-full">
+            <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+            {{ form.title }}
+            {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.date.id_for_label }}">{{ form.date.label }}</label>
+            {{ form.date }}
+            {% if form.date.errors %}<div class="field-error">{{ form.date.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.valid_until.id_for_label }}">{{ form.valid_until.label }}</label>
+            {{ form.valid_until }}
+            {% if form.valid_until.errors %}<div class="field-error">{{ form.valid_until.errors.0 }}</div>{% endif %}
+        </div>
+        {% if form.status %}
+        <div class="form-group">
+            <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+            {{ form.status }}
+            {% if form.status.errors %}<div class="field-error">{{ form.status.errors.0 }}</div>{% endif %}
+        </div>
+        {% endif %}
+        <div class="form-group form-group-full">
+            <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}<div class="field-error">{{ form.notes.errors.0 }}</div>{% endif %}
+        </div>
+    </div>
+</section>

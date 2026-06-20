@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ project.name }}</h1>
+        <p class="subtitle">
+            {% if project.customer_id %}
+            <a href="{% url 'projects:customer_detail' project.customer_id %}">{{ project.client_name }}</a>
+            {% else %}
+            {{ project.client_name }}
+            {% endif %}
+            {% if project.address %} — {{ project.address }}{% endif %}
+        </p>
+    </div>
+    <div class="page-actions">
+        {% if project.quote %}
+        <a href="{% url 'projects:quote_detail' project.quote.pk %}" class="btn">Προσφορά (PDF)</a>
+        {% endif %}
+        <a href="{% url 'reports:project_pdf' project.pk %}" class="btn">PDF</a>
+        {% url 'projects:project_edit' project.pk as project_edit_url %}
+        {% include "projects/_icon_edit_link.html" with url=project_edit_url button_class="btn btn-secondary btn-icon" %}
+        {% url 'projects:project_delete' project.pk as project_delete_url %}
+        {% include "projects/_password_delete_form.html" with delete_url=project_delete_url delete_title="Διαγραφή έργου" delete_message="Θα διαγραφεί οριστικά το έργο «"|add:project.name|add:"» και όλες οι καταχωρήσεις του." button_class="btn btn-danger btn-icon" next_url=request.get_full_path %}
+    </div>
+</div>
+
+{% if project.quote %}
+<p class="form-hint">
+    <a href="{% url 'projects:quote_detail' project.quote.pk %}">Προσφορά {{ project.quote.quote_number }}</a>
+</p>
+{% endif %}
+
+{% if project.start_date or project.end_date or project.notes %}
+<div class="project-meta form-card">
+    <div class="project-meta-grid">
+        {% if project.start_date %}
+        <div><span class="meta-label">Έναρξη</span> {{ project.start_date|date:"d/m/Y" }}</div>
+        {% endif %}
+        {% if project.end_date %}
+        <div><span class="meta-label">Ολοκλήρωση</span> {{ project.end_date|date:"d/m/Y" }}</div>
+        {% endif %}
+        {% if project.notes %}
+        <div class="project-meta-notes"><span class="meta-label">Σημειώσεις</span> {{ project.notes|linebreaksbr }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="quote-actions">
+    <a href="{% url 'projects:project_edit' project.pk %}" class="btn">Επεξεργασία στοιχείων</a>
+    {% if can_track_work %}
+    <form method="post" action="{% url 'projects:project_update_status' project.pk %}" class="inline-form">
+        {% csrf_token %}
+        {% if project.status != 'completed' %}
+        <button type="submit" name="status" value="completed" class="btn btn-secondary">Ολοκληρωμένο</button>
+        {% endif %}
+        {% if project.status != 'cancelled' %}
+        <button type="submit" name="status" value="cancelled" class="btn btn-secondary">Ακυρωμένο</button>
+        {% endif %}
+    </form>
+    {% elif pre_job_phase %}
+    <form method="post" action="{% url 'projects:project_update_status' project.pk %}" class="inline-form">
+        {% csrf_token %}
+        {% if project.status != 'cancelled' %}
+        <button type="submit" name="status" value="cancelled" class="btn btn-secondary">Ακύρωση αιτήματος</button>
+        {% endif %}
+    </form>
+    {% else %}
+    <form method="post" action="{% url 'projects:project_update_status' project.pk %}" class="inline-form">
+        {% csrf_token %}
+        {% if project.status != 'quote' %}
+        <button type="submit" name="status" value="quote" class="btn btn-secondary">Προσφορά</button>
+        {% endif %}
+        {% if project.status != 'completed' %}
+        <button type="submit" name="status" value="completed" class="btn btn-secondary">Ολοκληρωμένο</button>
+        {% endif %}
+        {% if project.status != 'cancelled' %}
+        <button type="submit" name="status" value="cancelled" class="btn btn-secondary">Ακυρωμένο</button>
+        {% endif %}
+    </form>
+    {% endif %}
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Κατάσταση</div>
+        <div class="stat-value stat-value-sm"><span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span></div>
+    </div>
+    <div class="stat-card stat-income">
+        <div class="stat-label">Σύνολο εσόδων</div>
+        <div class="stat-value">{{ project.total_income|floatformat:2 }} €</div>
+    </div>
+    <div class="stat-card stat-expense">
+        <div class="stat-label">Έξοδα έργου</div>
+        <div class="stat-value">{{ project.total_expenses|floatformat:2 }} €</div>
+    </div>
+    <div class="stat-card stat-profit">
+        <div class="stat-label">Κέρδος έργου</div>
+        <div class="stat-value {% if project.profit < 0 %}negative{% endif %}">{{ project.profit|floatformat:2 }} €</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Σύνολο εργατοωρών</div>
+        <div class="stat-value">{{ project.total_hours|floatformat:1 }} ωρ.</div>
+    </div>
+    {% if project.profit_margin is not None %}
+    <div class="stat-card">
+        <div class="stat-label">Profit margin</div>
+        <div class="stat-value">{{ project.profit_margin|floatformat:1 }}%</div>
+    </div>
+    {% endif %}
+    {% if project.quoted_amount %}
+    <div class="stat-card">
+        <div class="stat-label">Προσφορά</div>
+        <div class="stat-value">{{ project.quoted_amount|floatformat:2 }} €</div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="filter-section">
+    <h2>Φίλτρα καταχωρήσεων</h2>
+    {% include "projects/_filter_bar.html" with form=filter_form clear_url=clear_url %}
+</div>
+
+{% if category_breakdown %}
+<h2>Έξοδα ανά κατηγορία</h2>
+<div class="category-bars">
+    {% for cat in category_breakdown %}
+    <div class="category-row">
+        <span class="category-label">{{ cat.label }}</span>
+        <div class="category-bar-wrap">
+            <div class="category-bar" style="width: {% if project.total_expenses %}{% widthratio cat.total project.total_expenses 100 %}{% else %}0{% endif %}%"></div>
+        </div>
+        <span class="category-amount">{{ cat.total|floatformat:2 }} €</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if can_track_work %}
+<div class="finance-panel">
+    <div class="finance-panel__forms two-col">
+        <section class="finance-panel__block">
+            <h2>Καταχώρηση εσόδου</h2>
+            <div class="form-card form-card-compact finance-panel__form-card">
+                <form method="post" action="{{ post_url }}" class="finance-panel__form">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="income">
+                    {{ income_form.project }}
+                    {% for field in income_form %}
+                        {% if field.name != "project" %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="finance-panel__form-actions">
+                        <button type="submit" class="btn btn-primary btn-sm">Προσθήκη εσόδου</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="finance-panel__block">
+            <h2>Καταχώρηση εξόδου</h2>
+            <div class="form-card form-card-compact finance-panel__form-card">
+                <form method="post" action="{{ post_url }}" class="finance-panel__form">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="expense">
+                    {{ expense_form.project }}
+                    {% for field in expense_form %}
+                        {% if field.name != "project" %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="finance-panel__form-actions">
+                        <button type="submit" class="btn btn-primary btn-sm">Προσθήκη εξόδου</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <div class="finance-panel__lists two-col">
+        <section class="finance-panel__block">
+            <h2>Έσοδα</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ημερομηνία</th>
+                            <th>Τύπος</th>
+                            <th>Πληρωμή</th>
+                            <th class="num">Ποσό</th>
+                            <th>Περιγραφή</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for income in incomes %}
+                        <tr>
+                            <td>{{ income.date|date:"d/m/Y" }}</td>
+                            <td>{{ income.income_type.label }}</td>
+                            <td>{{ income.payment_method.label }}</td>
+                            <td class="num">{{ income.amount|floatformat:2 }} €</td>
+                            <td>{{ income.description }}</td>
+                            <td class="col-actions">
+                                {% url 'projects:project_income_edit' project.pk income.pk as income_edit_url %}
+                                {% url 'projects:project_income_delete' project.pk income.pk as income_delete_url %}
+                                {% include "projects/_finance_entry_actions.html" with edit_url=income_edit_url delete_url=income_delete_url query_string=request.GET.urlencode delete_item_label="αυτό το έσοδο" delete_amount=income.amount %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="empty">Καμία καταχώρηση</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="finance-panel__block">
+            <h2>Έξοδα έργου</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ημερομηνία</th>
+                            <th>Κατηγορία</th>
+                            <th class="num">Ποσό</th>
+                            <th>Προμηθευτής</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date|date:"d/m/Y" }}</td>
+                            <td>{{ expense.category.label }}</td>
+                            <td class="num">{{ expense.amount|floatformat:2 }} €</td>
+                            <td>{{ expense.supplier|default:expense.description }}</td>
+                            <td class="col-actions">
+                                {% url 'projects:project_expense_edit' project.pk expense.pk as expense_edit_url %}
+                                {% url 'projects:project_expense_delete' project.pk expense.pk as expense_delete_url %}
+                                {% include "projects/_finance_entry_actions.html" with edit_url=expense_edit_url delete_url=expense_delete_url query_string=request.GET.urlencode delete_item_label="αυτό το έξοδο" delete_amount=expense.amount %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="empty">Καμία καταχώρηση</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+{% if upcoming_schedules %}
+<section>
+    <div class="page-header page-header--tight">
+        <h2>Επερχόμενες εργασίες</h2>
+        <div class="page-actions">
+            <a href="{% url 'projects:work_schedule_create' %}?project={{ project.pk }}" class="btn btn-sm">Προγραμματισμός</a>
+            <a href="{% url 'projects:work_calendar' %}" class="btn btn-secondary btn-sm">Ημερολόγιο</a>
+        </div>
+    </div>
+    <div class="schedule-list schedule-list--compact">
+        {% for schedule in upcoming_schedules %}
+        {% include "projects/_work_schedule_card.html" with schedule=schedule %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="work-hours-section">
+    <h2>Εργατοώρες</h2>
+    <div class="two-col">
+        <div class="form-card form-card-compact">
+            <form method="post" action="{{ post_url }}" class="finance-panel__form">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="work_hours">
+                {{ work_hours_form.project }}
+                {% for field in work_hours_form %}
+                    {% if field.name != "project" %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                <div class="finance-panel__form-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">Καταχώρηση ωρών</button>
+                </div>
+            </form>
+        </div>
+        {% if hours_by_worker %}
+        <div class="form-card form-card-compact">
+            <h3 class="subsection-title">Ανά εργαζόμενο</h3>
+            <ul class="hours-summary">
+                {% for row in hours_by_worker %}
+                <li><span>{{ row.worker_display }}</span><strong>{{ row.total|floatformat:1 }} ωρ.</strong></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Ημερομηνία</th>
+                    <th>Εργαζόμενος</th>
+                    <th class="num">Ώρες</th>
+                    <th>Περιγραφή</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in work_hours_entries %}
+                <tr>
+                    <td>{{ entry.date|date:"d/m/Y" }}</td>
+                    <td>{{ entry.worker_display }}</td>
+                    <td class="num">{{ entry.hours|floatformat:1 }}</td>
+                    <td>{{ entry.description }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="empty">Καμία καταχώρηση εργατοωρών</td></tr>
+                {% endfor %}
+            </tbody>
+            {% if work_hours_entries %}
+            <tfoot>
+                <tr>
+                    <td colspan="2"><strong>Σύνολο</strong></td>
+                    <td class="num"><strong>{{ project.total_hours|floatformat:1 }} ωρ.</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+</section>
+{% endif %}
+
+<p><a href="{% url 'projects:project_list' %}">← Πίσω στα Έργα</a></p>
+{% endblock %}

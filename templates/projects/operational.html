@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Λειτουργικά — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Λειτουργικά</h1>
+        <p class="subtitle">Έσοδα και έξοδα εταιρείας — όχι δεμένα με συγκεκριμένο έργο</p>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card stat-expense">
+        <div class="stat-label">Έξοδα {{ current_month_label }}</div>
+        <div class="stat-value">{{ month_expense_total|floatformat:2 }} €</div>
+    </div>
+    <div class="stat-card stat-income">
+        <div class="stat-label">Έσοδα {{ current_month_label }}</div>
+        <div class="stat-value">{{ month_income_total|floatformat:2 }} €</div>
+    </div>
+    <div class="stat-card stat-profit">
+        <div class="stat-label">Καθαρό {{ current_month_label }}</div>
+        <div class="stat-value {% if month_net_total < 0 %}negative{% endif %}">{{ month_net_total|floatformat:2 }} €</div>
+    </div>
+</div>
+
+{% include "projects/_filter_bar.html" with form=filter_form filter_bar_class="filter-bar--many" %}
+
+<div class="operational-sections">
+    <section class="operational-section">
+        <h2>Λειτουργικά έξοδα</h2>
+        {% if expense_category_breakdown %}
+        <div class="category-bars">
+            {% for cat in expense_category_breakdown %}
+            <div class="category-row">
+                <span class="category-label">{{ cat.label }}</span>
+                <div class="category-bar-wrap">
+                    <div class="category-bar" style="width: {% if month_expense_total %}{% widthratio cat.total month_expense_total 100 %}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="category-amount">{{ cat.total|floatformat:2 }} €</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="two-col">
+            <div id="operational-expense-form">
+                <h3>Νέα καταχώρηση</h3>
+                <div class="form-card">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="expense">
+                        {% include "projects/_preserve_filters.html" %}
+                        {% for field in expense_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="field-error">{{ field.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary">Καταχώρηση εξόδου</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="operational-expense-history" data-pagination-section data-page-param="expense_page">
+                <h3>Ιστορικό εξόδων</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ημερομηνία</th>
+                                <th>Κατηγορία</th>
+                                <th class="num">Ποσό</th>
+                                <th>Περιγραφή</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in expense_page %}
+                            <tr>
+                                <td>{{ expense.date|date:"d/m/Y" }}</td>
+                                <td>{{ expense.category.label }}</td>
+                                <td class="num">{{ expense.amount|floatformat:2 }} €</td>
+                                <td>{{ expense.description|default:expense.supplier }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="empty">
+                                {% if filter_active %}Δεν βρέθηκαν εγγραφές{% else %}Καμία καταχώρηση{% endif %}
+                            </td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "projects/_pagination.html" with page_obj=expense_page pagination=expense_pagination %}
+            </div>
+        </div>
+    </section>
+
+    <section class="operational-section">
+        <h2>Λειτουργικά έσοδα</h2>
+        {% if income_category_breakdown %}
+        <div class="category-bars">
+            {% for cat in income_category_breakdown %}
+            <div class="category-row">
+                <span class="category-label">{{ cat.label }}</span>
+                <div class="category-bar-wrap">
+                    <div class="category-bar category-bar--income" style="width: {% if month_income_total %}{% widthratio cat.total month_income_total 100 %}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="category-amount">{{ cat.total|floatformat:2 }} €</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="two-col">
+            <div id="operational-income-form">
+                <h3>Νέα καταχώρηση</h3>
+                <div class="form-card">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="income">
+                        {% include "projects/_preserve_filters.html" %}
+                        {% for field in income_form %}
+                        <div class="form-group">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="field-error">{{ field.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary">Καταχώρηση εσόδου</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="operational-income-history" data-pagination-section data-page-param="income_page">
+                <h3>Ιστορικό εσόδων</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ημερομηνία</th>
+                                <th>Κατηγορία</th>
+                                <th class="num">Ποσό</th>
+                                <th>Περιγραφή</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for income in income_page %}
+                            <tr>
+                                <td>{{ income.date|date:"d/m/Y" }}</td>
+                                <td>{{ income.category.label }}</td>
+                                <td class="num">{{ income.amount|floatformat:2 }} €</td>
+                                <td>{{ income.description|default:income.source }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="empty">
+                                {% if filter_active %}Δεν βρέθηκαν εγγραφές{% else %}Καμία καταχώρηση{% endif %}
+                            </td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% include "projects/_pagination.html" with page_obj=income_page pagination=income_pagination %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

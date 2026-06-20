@@ -1,0 +1,10 @@
+# Προαιρετικό overlay για Tailscale Serve — χρήση:
+#   docker compose -f docker-compose.yml -f docker-compose.tailscale.yml up -d
+#
+# Δένει την εφαρμογή μόνο στο localhost του host· πρόσβαση μέσω:
+#   tailscale serve --bg http://127.0.0.1:8000
+
+services:
+  web:
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8000}:8000"

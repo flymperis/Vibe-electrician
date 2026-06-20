@@ -1,0 +1,43 @@
+{% extends "admin/change_form.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/role_permissions.css' %}">
+{% endblock %}
+
+{% block after_field_sets %}
+{{ block.super }}
+{% if show_permissions %}
+<div class="role-permissions role-permissions--inline">
+    <h2>Δικαιώματα πρόσβασης</h2>
+    <p class="role-permissions__intro">
+        Επίλεξε τι επιτρέπεται σε χρήστες με αυτόν τον ρόλο. Αποθηκεύονται μαζί με τον ρόλο.
+    </p>
+    {% for group_name, permissions in permission_groups %}
+    <section class="role-permissions__group">
+        <h3>{{ group_name }}</h3>
+        <ul class="role-permissions__list">
+            {% for row in permissions %}
+            <li class="role-permissions__item">
+                <label class="role-permissions__label">
+                    <input
+                        type="checkbox"
+                        name="perm_{{ row.definition.code }}"
+                        {% if row.allowed %}checked{% endif %}
+                    >
+                    <span class="role-permissions__label-text">
+                        <strong>{{ row.definition.label }}</strong>
+                        {% if row.definition.description %}
+                        <small>{{ row.definition.description }}</small>
+                        {% endif %}
+                    </span>
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

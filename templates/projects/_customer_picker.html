@@ -1,0 +1,30 @@
+{% comment %}
+Customer search picker for quote form. Expects: form (QuoteForm with selected_customer).
+{% endcomment %}
+<div class="customer-picker" id="customer-picker" data-search-url="{% url 'projects:customer_search' %}">
+    <div class="form-group">
+        <label for="customer-search-input">{{ form.customer.label }}</label>
+        {{ form.customer }}
+        <div class="quote-customer-picker__row">
+            <div class="customer-picker__search-area" id="customer-search-area"{% if form.selected_customer %} hidden{% endif %}>
+                <input
+                    type="search"
+                    id="customer-search-input"
+                    class="customer-picker__search"
+                    placeholder="Όνομα, ΑΦΜ, τηλέφωνο… (τουλάχιστον 2 γράμματα)"
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+                <ul class="customer-picker__results" id="customer-search-results" hidden></ul>
+            </div>
+            <div class="customer-picker__selected" id="customer-selected"{% if not form.selected_customer %} hidden{% endif %}>
+                <span class="customer-picker__selected-label" id="customer-selected-label">
+                    {% if form.selected_customer %}{{ form.selected_customer.display_label }}{% endif %}
+                </span>
+                <button type="button" class="btn btn-secondary btn-sm" id="customer-clear-btn">Αλλαγή</button>
+            </div>
+            <a href="{% url 'projects:customer_create' %}?next=quote" class="btn btn-secondary btn-sm" target="_blank" rel="noopener">+ Νέος</a>
+        </div>
+        {% if form.customer.errors %}<div class="field-error">{{ form.customer.errors.0 }}</div>{% endif %}
+    </div>
+</div>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Σύνδεση έργου — {{ quote.quote_number }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Σύνδεση με έργο</h1>
+        <p class="subtitle">{{ quote.quote_number }} — {{ quote.title }} ({{ quote.client_name }})</p>
+    </div>
+</div>
+
+{% if linked_project %}
+<div class="form-card">
+    <p>Η προσφορά είναι συνδεδεμένη με το έργο <strong>{{ linked_project.name }}</strong>.</p>
+    <a href="{% url 'projects:project_detail' linked_project.pk %}" class="btn">Άνοιγμα έργου</a>
+    <a href="{% url 'projects:quote_detail' quote.pk %}" class="btn btn-secondary">Πίσω στην προσφορά</a>
+</div>
+{% if can_change_link %}
+<p class="form-hint">Μπορείς να αλλάξεις σύνδεση πριν την αποδοχή από τον πελάτη:</p>
+{% endif %}
+{% endif %}
+
+{% if not linked_project or can_change_link %}
+<div class="two-col link-project-col">
+    <section class="form-card">
+        <h2>Υπάρχον έργο</h2>
+        <p class="form-hint">Έργα που δεν έχουν ήδη άλλη προσφορά.</p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="existing">
+            {% if form.project.errors %}
+            <div class="field-error">{{ form.project.errors.0 }}</div>
+            {% endif %}
+            <div class="form-group">
+                <label for="{{ form.project.id_for_label }}">{{ form.project.label }}</label>
+                {{ form.project }}
+            </div>
+            <button type="submit" class="btn btn-primary" {% if not form.project.field.queryset %}disabled{% endif %}>
+                Σύνδεση με επιλεγμένο έργο
+            </button>
+        </form>
+        {% if not form.project.field.queryset %}
+        <p class="form-hint">Δεν υπάρχουν διαθέσιμα έργα — δημιούργησε νέο παρακάτω.</p>
+        {% endif %}
+    </section>
+
+    <section class="form-card">
+        <h2>Νέο έργο</h2>
+        <p class="form-hint">
+            Δημιουργεί έργο σε φάση «Προσφορά» με στοιχεία από την προσφορά
+            ({{ quote.title }}, {{ quote.client_name }}).
+        </p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="new">
+            <button type="submit" class="btn btn-primary">
+                + Δημιουργία νέου έργου &amp; σύνδεση
+            </button>
+        </form>
+    </section>
+</div>
+{% endif %}
+
+<p><a href="{% url 'projects:quote_detail' quote.pk %}">← Πίσω στην προσφορά</a></p>
+{% endblock %}

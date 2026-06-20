@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Διαγραφή εργασίας — Vibe Electrician{% endblock %}
+
+{% block content %}
+<h1>Διαγραφή εργασίας</h1>
+<p class="subtitle">Να διαγραφεί η εργασία «{{ schedule.title }}» ({{ schedule.date|date:"d/m/Y" }});</p>
+
+<form method="post" class="form-card">
+    {% csrf_token %}
+    <div class="form-actions">
+        <button type="submit" class="btn btn-danger">Διαγραφή</button>
+        <a href="{{ cancel_url }}" class="btn btn-secondary">Ακύρωση</a>
+    </div>
+</form>
+{% endblock %}

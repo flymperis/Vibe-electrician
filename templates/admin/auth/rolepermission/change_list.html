@@ -1,0 +1,72 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/role_permissions.css' %}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" class="role-permissions">
+    <h1>{{ title }}</h1>
+    <p class="role-permissions__intro">
+        Επίλεξε ρόλο και όρισε ποια δικαιώματα έχει. Οι αλλαγές ισχύουν αμέσως για όλους τους χρήστες με τον ρόλο αυτό.
+        <a href="{% url 'admin:auth_authrole_changelist' %}">Διαχείριση ρόλων</a>
+        ·
+        <a href="{% url 'admin:auth_authrole_add' %}">Νέος ρόλος</a>
+    </p>
+
+    <nav class="role-permissions__tabs" aria-label="Ρόλοι">
+        {% for tab in role_tabs %}
+        <a
+            href="?role={{ tab.id }}"
+            class="role-permissions__tab{% if tab.active %} role-permissions__tab--active{% endif %}"
+        >
+            {{ tab.label }}
+        </a>
+        {% endfor %}
+    </nav>
+
+    <form method="post" class="role-permissions__form">
+        {% csrf_token %}
+        <input type="hidden" name="role" value="{{ selected_role.pk }}">
+
+        {% for group_name, permissions in permission_groups %}
+        <section class="role-permissions__group">
+            <h2>{{ group_name }}</h2>
+            <ul class="role-permissions__list">
+                {% for row in permissions %}
+                <li class="role-permissions__item">
+                    <label class="role-permissions__label">
+                        <input
+                            type="checkbox"
+                            name="perm_{{ row.definition.code }}"
+                            {% if row.allowed %}checked{% endif %}
+                        >
+                        <span class="role-permissions__label-text">
+                            <strong>{{ row.definition.label }}</strong>
+                            {% if row.definition.description %}
+                            <small>{{ row.definition.description }}</small>
+                            {% endif %}
+                        </span>
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endfor %}
+
+        <div class="submit-row">
+            <input type="submit" value="Αποθήκευση δικαιωμάτων" class="default">
+        </div>
+    </form>
+</div>
+{% endblock %}

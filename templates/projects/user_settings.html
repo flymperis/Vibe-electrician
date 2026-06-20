@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_ui.settings_title }} — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ page_ui.settings_title }}</h1>
+        <p class="subtitle">{{ page_ui.settings_subtitle }}</p>
+    </div>
+</div>
+
+<div class="form-card settings-card">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="{{ form.language.id_for_label }}">{{ page_ui.settings_language }}</label>
+                {{ form.language }}
+                {% if form.language.errors %}
+                <div class="field-error">{{ form.language.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group form-group-checkbox">
+                <label class="checkbox-label">
+                    {{ form.dark_mode }}
+                    <span>{{ page_ui.settings_dark_mode }}</span>
+                </label>
+                <p class="field-help">{{ page_ui.settings_dark_mode_help }}</p>
+                {% if form.dark_mode.errors %}
+                <div class="field-error">{{ form.dark_mode.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ page_ui.settings_save }}</button>
+        </div>
+    </form>
+</div>
+
+<p class="settings-account-note">
+    {{ page_ui.settings_account }}: <strong>{{ profile.display_name }}</strong>
+    ({{ user.username }})
+</p>
+{% endblock %}

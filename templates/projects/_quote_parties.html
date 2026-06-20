@@ -1,0 +1,42 @@
+<div class="quote-spec quote-spec--detail">
+    <div class="quote-spec__cols">
+        <div class="quote-spec__col">
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">Πελάτης</span>
+                <span class="quote-spec__value">{{ quote.client_name|default:"—" }}</span>
+            </div>
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">Οδός</span>
+                <span class="quote-spec__value">{{ quote.address|default:"—" }}</span>
+            </div>
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">ΑΦΜ</span>
+                <span class="quote-spec__value">{{ quote.client_vat|default:"—" }}</span>
+            </div>
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">Τηλέφωνο</span>
+                <span class="quote-spec__value">{{ quote.client_phone|default:"—" }}</span>
+            </div>
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">Email</span>
+                <span class="quote-spec__value">
+                    {% if quote.client_email %}<a href="mailto:{{ quote.client_email }}">{{ quote.client_email }}</a>{% else %}—{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="quote-spec__col">
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">Προσφορά</span>
+                <span class="quote-spec__value">{{ quote.quote_number|default:"—" }}</span>
+            </div>
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">Ισχύς</span>
+                <span class="quote-spec__value">{% if quote.date %}{{ quote.date|date:"d/m/Y" }}{% if quote.valid_until %} – {{ quote.valid_until|date:"d/m/Y" }}{% endif %}{% else %}—{% endif %}</span>
+            </div>
+            <div class="quote-spec__row">
+                <span class="quote-spec__label">Έργο</span>
+                <span class="quote-spec__value">{{ quote.title|default:"—" }}</span>
+            </div>
+        </div>
+    </div>
+</div>

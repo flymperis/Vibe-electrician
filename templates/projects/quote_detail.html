@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ quote.quote_number }} — Vibe Electrician{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/quote-items-table.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>{{ quote.quote_number }}</h1>
+        <p class="subtitle">
+            {{ quote.title }} — {{ quote.client_name }}
+            {% if quote.project %} · <a href="{% url 'projects:project_detail' quote.project.pk %}">Έργο: {{ quote.project.name }}</a>{% endif %}
+        </p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'reports:quote_pdf' quote.pk %}" class="btn btn-primary">Λήψη PDF για πελάτη</a>
+        {% if not has_project %}
+        {% url 'projects:quote_edit' quote.pk as quote_edit_url %}
+        {% include "projects/_icon_edit_link.html" with url=quote_edit_url button_class="btn btn-icon" %}
+        {% endif %}
+        {% if can_delete %}
+        {% url 'projects:quote_delete' quote.pk as quote_delete_url %}
+        {% include "projects/_password_delete_form.html" with delete_url=quote_delete_url delete_title="Διαγραφή προσφοράς" delete_message="Θα διαγραφεί οριστικά η προσφορά "|add:quote.quote_number|add:"." button_class="btn btn-danger btn-icon" next_url=request.get_full_path %}
+        {% elif has_project %}
+        <span class="page-actions-hint" title="Διαγραφή μόνο όταν δεν έχει δημιουργηθεί έργο">Δεν διαγράφεται — υπάρχει έργο</span>
+        {% endif %}
+    </div>
+</div>
+
+{% if not has_project %}
+    {% if quote.status == 'draft' %}
+    {% include "projects/_workflow_steps.html" with step=1 %}
+    {% elif quote.status == 'sent' %}
+    {% include "projects/_workflow_steps.html" with step=3 %}
+    {% elif quote.status == 'rejected' %}
+    <div class="workflow-banner workflow-banner-muted">
+        <p>Η προσφορά απορρίφθηκε — δεν δημιουργείται έργο.</p>
+    </div>
+    {% endif %}
+
+{% else %}
+{% include "projects/_workflow_steps.html" with step=4 %}
+<div class="workflow-banner">
+    <p>Το έργο έχει δημιουργηθεί. Έσοδα, έξοδα και εργατοώρες καταχωρούνται από τη <a href="{% url 'projects:project_detail' quote.project.pk %}">σελίδα του έργου</a>.</p>
+</div>
+{% endif %}
+
+{% if can_create_project or not has_project and quote.status != 'rejected' %}
+<div class="quote-actions">
+    {% if can_create_project %}
+    <form method="post" action="{% url 'projects:quote_create_project' quote.pk %}" class="inline-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary" onclick="return confirm('Να δημιουργηθεί το έργο με τα στοιχεία της προσφοράς;')">
+            Δημιουργία έργου
+        </button>
+    </form>
+    {% endif %}
+
+    {% if not has_project and quote.status != 'rejected' %}
+    <form method="post" action="{% url 'projects:quote_update_status' quote.pk %}" class="inline-form">
+        {% csrf_token %}
+        {% if quote.status != 'sent' %}
+        <button type="submit" name="status" value="sent" class="btn btn-secondary">Απεσταλμένη</button>
+        {% endif %}
+        {% if quote.status != 'draft' %}
+        <button type="submit" name="status" value="draft" class="btn btn-secondary">Πρόχειρο</button>
+        {% endif %}
+        {% if quote.status != 'rejected' %}
+        <button type="submit" name="status" value="rejected" class="btn btn-secondary">Απόρριψη</button>
+        {% endif %}
+    </form>
+    {% endif %}
+</div>
+{% endif %}
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Κατάσταση</div>
+        <div class="stat-value stat-value-sm">
+            <span class="badge badge-{{ quote.status }}">{{ quote.get_status_display }}</span>
+        </div>
+    </div>
+    <div class="stat-card stat-income">
+        <div class="stat-label">Σύνολο προσφοράς</div>
+        <div class="stat-value">{{ quote.total|floatformat:2 }} €</div>
+        {% if quote.uses_manual_total %}
+        <p class="form-hint">Χειροκίνητο σύνολο (άθροισμα γραμμών: {{ quote.lines_subtotal|floatformat:2 }} €)</p>
+        {% endif %}
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Ημερομηνία</div>
+        <div class="stat-value stat-value-sm">{{ quote.date|date:"d/m/Y" }}</div>
+    </div>
+    {% if quote.valid_until %}
+    <div class="stat-card">
+        <div class="stat-label">Ισχύς έως</div>
+        <div class="stat-value stat-value-sm">{{ quote.valid_until|date:"d/m/Y" }}</div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="quote-preview form-card">
+    {% include "projects/_quote_parties.html" %}
+
+    <div class="table-wrap table-wrap--quote-items">
+        {% include "projects/_quote_items_table.html" %}
+    </div>
+
+    {% if quote.notes %}
+    <div class="quote-notes">
+        <strong>Σημειώσεις / Όροι</strong>
+        <p>{{ quote.notes|linebreaksbr }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<p><a href="{% url 'projects:quote_list' %}">← Πίσω στις προσφορές</a></p>
+{% endblock %}

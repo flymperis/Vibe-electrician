@@ -1,0 +1,7 @@
+{% if link and can_manage_schedules %}
+<a href="{% url 'projects:work_schedule_edit' schedule.pk %}" class="calendar-event calendar-event--color-{{ schedule.calendar_color_index }} calendar-event--inline calendar-event--{{ schedule.status }}">{{ schedule.title|truncatechars:28 }}</a>
+{% elif link %}
+<a href="{% url 'projects:work_calendar' %}?year={{ schedule.date.year }}&month={{ schedule.date.month }}&day={{ schedule.date|date:'Y-m-d' }}" class="calendar-event calendar-event--color-{{ schedule.calendar_color_index }} calendar-event--inline calendar-event--{{ schedule.status }}">{{ schedule.title|truncatechars:28 }}</a>
+{% else %}
+<span class="calendar-event calendar-event--color-{{ schedule.calendar_color_index }} calendar-event--{{ schedule.status }}">{{ schedule.title|truncatechars:28 }}</span>
+{% endif %}

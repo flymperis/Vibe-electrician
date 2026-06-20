@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="{{ user_language|default:'el' }}" data-theme="{{ theme|default:'light' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vibe Electrician{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="navbar" id="site-nav">
+        <div class="navbar__head">
+            <div class="nav-brand">
+                <a href="{% if can_manage_business %}{% url 'projects:dashboard' %}{% else %}{% url 'projects:work_calendar' %}{% endif %}">⚡ Vibe Electrician</a>
+            </div>
+            <button
+                type="button"
+                class="nav-toggle"
+                aria-expanded="false"
+                aria-controls="nav-menu"
+                aria-label="{{ ui.nav_menu }}"
+            >
+                <span class="nav-toggle__bar"></span>
+                <span class="nav-toggle__bar"></span>
+                <span class="nav-toggle__bar"></span>
+            </button>
+        </div>
+        <div class="nav-links" id="nav-menu">
+            {% if can_manage_business %}
+            <a href="{% url 'projects:dashboard' %}">{{ ui.nav_dashboard }}</a>
+            <a href="{% url 'projects:project_list' %}">{{ ui.nav_projects }}</a>
+            <a href="{% url 'projects:customer_list' %}">{{ ui.nav_customers }}</a>
+            <a href="{% url 'projects:quote_list' %}">{{ ui.nav_quotes }}</a>
+            {% endif %}
+            <a href="{% url 'projects:work_calendar' %}">{{ ui.nav_calendar }}</a>
+            {% if can_manage_business %}
+            <a href="{% url 'projects:operational_expenses' %}">{{ ui.nav_operational }}</a>
+            <a href="{% url 'projects:monthly_report' %}">{{ ui.nav_reports }}</a>
+            {% endif %}
+            {% if can_access_admin %}
+            <a href="/admin/">{{ ui.nav_admin }}</a>
+            {% endif %}
+            <a
+                href="{% url 'projects:user_settings' %}"
+                class="nav-settings{% if request.resolver_match.url_name == 'user_settings' %} nav-settings--active{% endif %}"
+                title="{{ ui.nav_settings }}"
+                aria-label="{{ ui.nav_settings }}"
+            >
+                <svg class="nav-settings__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span class="nav-settings__label">{{ ui.nav_settings }}</span>
+            </a>
+            <form method="post" action="{% url 'logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="btn-link">{{ ui.nav_logout }} ({{ user.username }})</button>
+            </form>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if user.is_authenticated %}
+    <dialog id="password-delete-dialog" class="password-delete-dialog">
+        <div class="password-delete-dialog__panel">
+            <h2 id="password-delete-title">Επιβεβαίωση διαγραφής</h2>
+            <p id="password-delete-message"></p>
+            <label for="password-delete-input">Κωδικός λογαριασμού</label>
+            <input
+                type="password"
+                id="password-delete-input"
+                autocomplete="current-password"
+                required
+            >
+            <p id="password-delete-error" class="form-error" hidden></p>
+            <div class="password-delete-dialog__actions">
+                <button type="button" class="btn btn-secondary" data-password-delete-cancel>Ακύρωση</button>
+                <button type="button" class="btn btn-danger" data-password-delete-confirm>Διαγραφή</button>
+            </div>
+        </div>
+    </dialog>
+    <script src="{% static 'js/password_confirm_delete.js' %}"></script>
+    <script src="{% static 'js/nav_mobile.js' %}"></script>
+    <script src="{% static 'js/pagination_scroll.js' %}" defer></script>
+    {% endif %}
+</body>
+</html>
