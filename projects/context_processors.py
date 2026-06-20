@@ -2,6 +2,7 @@ from .permissions import (
     can_access_admin,
     can_manage_business,
     can_manage_schedules,
+    get_user_profile,
     get_user_role,
 )
 from .ui_strings import LANGUAGE_EL, get_ui
@@ -28,7 +29,7 @@ def user_preferences(request):
             "theme": "light",
             "ui": ui,
         }
-    profile = getattr(request.user, "profile", None)
+    profile = get_user_profile(request.user)
     language = profile.language if profile else LANGUAGE_EL
     dark_mode = profile.dark_mode if profile else False
     ui = get_ui(language)

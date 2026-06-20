@@ -37,12 +37,21 @@ def _role_permissions_snapshot() -> dict[str, dict[str, bool]]:
     return snapshot
 
 
+def get_user_profile(user):
+    from .models import UserProfile
+
+    try:
+        return user.profile
+    except UserProfile.DoesNotExist:
+        return None
+
+
 def get_user_role(user) -> str | None:
     if not user.is_authenticated:
         return None
     if user.is_superuser:
         return ROLE_ADMIN
-    profile = getattr(user, "profile", None)
+    profile = get_user_profile(user)
     if profile is None or profile.role_id is None:
         return ROLE_WORKER
     return profile.role.code
@@ -87,7 +96,7 @@ def get_login_redirect_url(user) -> str:
 def user_display_name(user) -> str:
     if not user:
         return "—"
-    profile = getattr(user, "profile", None)
+    profile = get_user_profile(user)
     if profile is not None:
         return profile.display_name
     full = (user.get_full_name() or "").strip()

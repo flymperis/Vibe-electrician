@@ -10,6 +10,8 @@ if [ "$SEED_DEMO" = "true" ]; then
     python manage.py seed_demo
 fi
 
+python manage.py shell -c "from projects.role_permissions import ensure_system_roles; ensure_system_roles()"
+
 exec gunicorn vibe.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers 2 \

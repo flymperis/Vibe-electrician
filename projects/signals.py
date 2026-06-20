@@ -27,16 +27,23 @@ def ensure_user_profile(sender, instance, created, **kwargs):
     from .role_permissions import ensure_system_roles
 
     ensure_system_roles()
-    profile, profile_created = UserProfile.objects.get_or_create(user=instance)
-    if not profile_created:
-        return
+
     if instance.is_superuser:
-        profile.role = Role.by_code(ROLE_ADMIN)
+        role = Role.by_code(ROLE_ADMIN)
     elif instance.is_staff:
-        profile.role = Role.by_code(UserProfile.CODE_OWNER)
+        role = Role.by_code(UserProfile.CODE_OWNER)
     else:
-        profile.role = Role.by_code(UserProfile.CODE_WORKER)
-    profile.save(update_fields=["role"])
+        role = Role.by_code(UserProfile.CODE_WORKER)
+
+    profile, profile_created = UserProfile.objects.get_or_create(
+        user=instance,
+        defaults={"role": role},
+    )
+    if not profile_created:
+        if profile.role_id is None:
+            profile.role = role
+            profile.save(update_fields=["role"])
+        return
     _sync_staff_flags(instance, profile.role.code)
 
 

@@ -1,0 +1,33 @@
+# Production stack: Vibe Electrician + Portainer
+# Χρήση στον server:
+#   cp .env.example .env   (και συμπλήρωσε)
+#   docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  web:
+    build: .
+    container_name: vibe-electrician
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "false"
+      DATABASE_PATH: /app/data/db.sqlite3
+      MEDIA_ROOT: /app/data/media
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "${PORTAINER_PORT:-9443}:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: unless-stopped
+
+volumes:
+  portainer_data:

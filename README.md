@@ -52,6 +52,17 @@ docker compose up -d --build        # rebuild μετά από git pull
 docker compose exec web python manage.py migrate
 ```
 
+### Production stack (app + Portainer)
+
+Στον server (Hetzner + Tailscale):
+
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+- Εφαρμογή: `http://100.x.x.x:8000` (Tailscale IP)
+- Portainer: `https://100.x.x.x:9443`
+
 ### Demo δεδομένα (μόνο dev)
 
 Στο `.env` βάλε `SEED_DEMO=true` και ξανακάνε `docker compose up -d --build`.
