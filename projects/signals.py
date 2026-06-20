@@ -44,6 +44,9 @@ def ensure_user_profile(sender, instance, created, **kwargs):
             profile.role = role
             profile.save(update_fields=["role"])
         return
+    if not instance.is_superuser:
+        profile.must_change_password = True
+        profile.save(update_fields=["must_change_password"])
     _sync_staff_flags(instance, profile.role.code)
 
 

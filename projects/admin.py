@@ -427,7 +427,7 @@ class UserProfileInline(admin.StackedInline):
     can_delete = False
     fk_name = "user"
     verbose_name_plural = "Ρόλος"
-    fields = ("role", "language", "dark_mode")
+    fields = ("role", "language", "dark_mode", "must_change_password")
     extra = 0
 
     def has_add_permission(self, request, obj=None):

@@ -203,6 +203,7 @@ URL_PERMISSION_MAP: dict[str, str | None] = {
     "login": None,
     "logout": None,
     "user_settings": None,
+    "password_change_required": None,
 }
 
 

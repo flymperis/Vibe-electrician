@@ -85,6 +85,11 @@ class UserProfile(models.Model):
         default=LANG_EL,
     )
     dark_mode = models.BooleanField("Dark mode", default=False)
+    must_change_password = models.BooleanField(
+        "Αλλαγή κωδικού στο επόμενο login",
+        default=False,
+        help_text="Ο χρήστης ορίζει δικό του κωδικό μετά την πρώτη σύνδεση.",
+    )
 
     class Meta:
         verbose_name = "Προφίλ χρήστη"

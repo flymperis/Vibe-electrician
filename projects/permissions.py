@@ -46,6 +46,11 @@ def get_user_profile(user):
         return None
 
 
+def user_must_change_password(user) -> bool:
+    profile = get_user_profile(user)
+    return bool(profile and profile.must_change_password)
+
+
 def get_user_role(user) -> str | None:
     if not user.is_authenticated:
         return None

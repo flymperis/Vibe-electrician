@@ -82,6 +82,8 @@ class Command(BaseCommand):
         if profile.role_id != role.pk:
             profile.role = role
             profile.save(update_fields=["role"])
+        profile.must_change_password = False
+        profile.save(update_fields=["must_change_password"])
 
     def _create_worker_user(self, username: str, first_name: str, password: str = "demo1234"):
         user, created = User.objects.get_or_create(

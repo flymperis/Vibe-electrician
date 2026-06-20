@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from .auth_views import password_change_required
 
 app_name = "projects"
 
@@ -58,4 +59,9 @@ urlpatterns = [
     path("prosfores/<int:pk>/katastasi/", views.quote_update_status, name="quote_update_status"),
     path("prosfores/<int:pk>/diagrafi/", views.quote_delete, name="quote_delete"),
     path("rythmiseis/", views.user_settings, name="user_settings"),
+    path(
+        "allagi-kwdikou/",
+        password_change_required,
+        name="password_change_required",
+    ),
 ]
