@@ -27,3 +27,6 @@ Thumbs.db
 # Cursor / local assets
 .cursor/
 assets/
+
+# Local PDF test output
+_test*.pdf
