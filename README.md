@@ -50,18 +50,61 @@ docker compose logs -f web          # logs
 docker compose down                 # stop
 docker compose up -d --build        # rebuild μετά από git pull
 docker compose exec web python manage.py migrate
+docker compose exec web python manage.py repair_user_profiles   # μετά upgrade / αν λείπουν profiles
 ```
 
-### Production stack (app + Portainer)
+### Production stack (δικό σου compose)
 
-Στον server (Hetzner + Tailscale):
+Το repo δίνει μόνο `docker-compose.yml` (εφαρμογή). Για server (π.χ. Hetzner + Portainer), **φτιάξε το δικό σου** `docker-compose.prod.yml` — **δεν** είναι στο git:
+
+```bash
+nano docker-compose.prod.yml
+```
+
+Παράδειγμα (app + Portainer):
+
+```yaml
+services:
+  web:
+    build: .
+    container_name: vibe-electrician
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "false"
+      DATABASE_PATH: /app/data/db.sqlite3
+      MEDIA_ROOT: /app/data/media
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: unless-stopped
+
+volumes:
+  portainer_data:
+```
+
+Εκκίνηση:
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker-compose.prod.yml exec web python manage.py repair_user_profiles
 ```
 
-- Εφαρμογή: `http://100.x.x.x:8000` (Tailscale IP)
-- Portainer: `https://100.x.x.x:9443`
+Πρόσβαση (Tailscale): `http://100.x.x.x:8000` · Portainer: `https://100.x.x.x:9443`
+
+Μπορείς να αφαιρέσεις το service `portainer` ή να προσθέσεις δικά σου services — το `.env` μένει κοινό.
 
 ### Demo δεδομένα (μόνο dev)
 
@@ -157,10 +200,12 @@ Vibe-Electrician/
 ├── data/                  # SQLite + media (gitignored, Docker volume)
 ├── scripts/backup.sh
 ├── docker-compose.yml
-├── docker-compose.tailscale.yml   # optional overlay
+├── docker-compose.tailscale.yml   # optional overlay (localhost bind)
 ├── Dockerfile
 └── .env.example
 ```
+
+**Στο server (τοπικά, όχι git):** `docker-compose.prod.yml` — δικό σου overlay (π.χ. Portainer).
 
 ---
 
