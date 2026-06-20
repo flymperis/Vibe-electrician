@@ -428,6 +428,11 @@ class UserProfileInline(admin.StackedInline):
     fk_name = "user"
     verbose_name_plural = "Ρόλος"
     fields = ("role", "language", "dark_mode")
+    extra = 0
+
+    def has_add_permission(self, request, obj=None):
+        # Το profile δημιουργείται από signal στο save του User — όχι δεύτερο inline insert.
+        return False
 
 
 class UserAdmin(BaseUserAdmin):

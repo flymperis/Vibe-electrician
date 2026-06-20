@@ -11,6 +11,7 @@ if [ "$SEED_DEMO" = "true" ]; then
 fi
 
 python manage.py shell -c "from projects.role_permissions import ensure_system_roles; ensure_system_roles()"
+python manage.py repair_user_profiles
 
 exec gunicorn vibe.wsgi:application \
     --bind 0.0.0.0:8000 \

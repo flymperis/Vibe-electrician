@@ -36,7 +36,7 @@ from .models import (
     WorkSchedule,
 )
 from .lookup import active_queryset, filter_choices
-from .permissions import assignable_workers_queryset
+from .permissions import assignable_workers_queryset, user_display_name
 
 User = get_user_model()
 
@@ -234,9 +234,7 @@ class WorkHoursForm(forms.ModelForm):
         )
         self.fields["worker"].queryset = assignable_workers_queryset()
         self.fields["worker"].required = False
-        self.fields["worker"].label_from_instance = lambda user: (
-            user.profile.display_name if hasattr(user, "profile") else user.username
-        )
+        self.fields["worker"].label_from_instance = user_display_name
         if project:
             self.fields["project"].initial = project
             self.fields["project"].widget = forms.HiddenInput()
@@ -288,9 +286,7 @@ class WorkScheduleForm(forms.ModelForm):
         ).order_by("name")
         self.fields["project"].required = False
         self.fields["workers"].queryset = assignable_workers_queryset()
-        self.fields["workers"].label_from_instance = lambda user: (
-            user.profile.display_name if hasattr(user, "profile") else user.username
-        )
+        self.fields["workers"].label_from_instance = user_display_name
         if project:
             self.fields["project"].initial = project
         if default_date and not self.data:
@@ -366,9 +362,7 @@ class WorkScheduleFilterForm(forms.Form):
             status=Project.STATUS_CANCELLED
         ).order_by("name")
         self.fields["worker"].queryset = assignable_workers_queryset()
-        self.fields["worker"].label_from_instance = lambda user: (
-            user.profile.display_name if hasattr(user, "profile") else user.username
-        )
+        self.fields["worker"].label_from_instance = user_display_name
 
 
 class ProjectFilterForm(forms.Form):
@@ -468,9 +462,7 @@ class DateRangeFilterForm(forms.Form):
             LookupOption.GROUP_PROJECT_EXPENSE, "Όλες"
         )
         self.fields["worker"].queryset = assignable_workers_queryset()
-        self.fields["worker"].label_from_instance = lambda user: (
-            user.profile.display_name if hasattr(user, "profile") else user.username
-        )
+        self.fields["worker"].label_from_instance = user_display_name
 
     def clean(self):
         cleaned = super().clean()

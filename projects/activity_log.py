@@ -9,6 +9,7 @@ from typing import Any
 from django.contrib.auth import get_user_model
 
 from .lookup import label_for_id
+from .permissions import get_user_profile
 from .models import (
     ActivityLog,
     Customer,
@@ -417,7 +418,7 @@ def _format_user_fk(_name: str, value: Any) -> str:
     user = User.objects.filter(pk=value).first()
     if not user:
         return str(value)
-    profile = getattr(user, "profile", None)
+    profile = get_user_profile(user)
     if profile is not None:
         return profile.display_name
     return user.get_full_name() or user.username
