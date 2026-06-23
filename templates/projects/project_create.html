@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Νέο έργο — Vibe Electrician{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Νέο έργο</h1>
+        <p class="subtitle">Διαθέσιμες προσφορές χωρίς έργο</p>
+    </div>
+    <div class="page-actions">
+        <a href="{% url 'projects:quote_create' %}" class="btn btn-primary">Δημιουργία νέας προσφοράς</a>
+    </div>
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th class="col-nowrap">Αρ.</th>
+                <th>Τίτλος</th>
+                <th>Πελάτης</th>
+                <th>Ημερομηνία</th>
+                <th>Κατάσταση</th>
+                <th class="num">Σύνολο</th>
+                <th class="col-actions"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for quote in quotes %}
+            <tr>
+                <td class="col-nowrap">{{ quote.quote_number }}</td>
+                <td>{{ quote.title }}</td>
+                <td>{{ quote.client_name }}</td>
+                <td>{{ quote.date|date:"d/m/Y" }}</td>
+                <td><span class="badge badge-{{ quote.status }}">{{ quote.get_status_display }}</span></td>
+                <td class="num">{{ quote.total|floatformat:2 }} €</td>
+                <td class="col-actions">
+                    <form method="post" action="{% url 'projects:quote_create_project' quote.pk %}" class="inline-form">
+                        {% csrf_token %}
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-sm"
+                            onclick="return confirm('Να δημιουργηθεί το έργο «{{ quote.title|escapejs }}»;')"
+                        >
+                            Δημιουργία έργου
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="empty">Δεν υπάρχουν προσφορές χωρίς έργο.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

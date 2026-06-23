@@ -694,17 +694,56 @@ td.col-text {
     margin-top: 0;
 }
 
-.finance-panel__lists .finance-panel__block > h2 {
-    margin: 0 0 1rem;
+.finance-panel__lists.two-col {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: stretch;
 }
 
-.finance-panel__lists .table-wrap {
+.finance-panel__lists .finance-panel__block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.finance-panel__lists .finance-panel__block > h2 {
+    margin: 0;
+}
+
+.finance-panel__lists .finance-panel__list-card {
+    margin-bottom: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+}
+
+.finance-panel__lists .finance-panel__list-card .table-wrap {
     margin-top: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    width: 100%;
+}
+
+.finance-panel__lists .finance-panel__list-card .table-wrap table {
+    width: 100%;
 }
 
 @media (max-width: 768px) {
     .two-col { grid-template-columns: 1fr; }
-    .operational-sections { grid-template-columns: 1fr; }
+
+    /* Αποφυγή auto-zoom iOS στα πεδία — προκαλεί άλμα scroll στο blur */
+    .form-group input,
+    .form-group select,
+    .form-group textarea,
+    .finance-panel__form input,
+    .finance-panel__form select,
+    .finance-panel__form textarea,
+    .filter-field input,
+    .filter-field select {
+        font-size: 16px;
+    }
 
     .navbar {
         flex-direction: column;
@@ -918,10 +957,15 @@ td.col-text {
     padding: 0.15rem 0;
 }
 
-.filter-dropdown__menu input {
-    width: auto;
+.filter-dropdown__menu input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
     margin: 0;
+    padding: 0;
+    flex-shrink: 0;
     cursor: pointer;
+    accent-color: var(--primary);
 }
 
 .filter-bar-errors {
@@ -940,7 +984,7 @@ td.col-text {
     border-color: var(--expense);
 }
 
-.filter-field input,
+.filter-field input:not([type="checkbox"]):not([type="radio"]),
 .filter-field select,
 .filter-form select {
     width: 100%;
@@ -1147,6 +1191,7 @@ html[data-theme="dark"] .filter-field input[type="date"]::-webkit-calendar-picke
 
 .work-hours-section {
     margin-top: 2rem;
+    scroll-margin-top: 5rem;
 }
 
 .subsection-title {
@@ -1300,11 +1345,30 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
     }
 
     .quote-spec--detail .quote-spec__cols {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .quote-spec--detail .quote-spec__col {
+        flex: 1 1 auto;
+        width: 100%;
     }
 
     .quote-spec--detail .quote-spec__row {
         grid-template-columns: 5.25rem 1fr;
+        gap: 0.35rem 0.75rem;
+        padding: 0.25rem 0;
+    }
+}
+
+@media (max-width: 400px) {
+    .quote-spec--detail .quote-spec__row {
+        grid-template-columns: 1fr;
+        gap: 0.15rem;
+    }
+
+    .quote-spec--detail .quote-spec__value {
+        padding-bottom: 0.35rem;
     }
 }
 
@@ -1321,6 +1385,14 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
     align-items: center;
     margin-top: 0.5rem;
     margin-bottom: 1.5rem;
+}
+
+.quote-actions .inline-form {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin: 0;
 }
 
 .project-meta {
@@ -1407,8 +1479,9 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
     flex-wrap: wrap;
     gap: 0.5rem 1rem;
     list-style: none;
+    list-style-type: none;
     padding: 0;
-    margin: 0 0 0.5rem;
+    margin: 0 0 1.25rem;
 }
 
 .workflow-steps li {
@@ -1417,6 +1490,11 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
     gap: 0.35rem;
     font-size: 0.85rem;
     color: var(--muted);
+    list-style: none;
+}
+
+.workflow-steps li::marker {
+    content: none;
 }
 
 .workflow-steps li.done {
@@ -1486,6 +1564,27 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
 .operational-section h3 {
     margin-bottom: 0.75rem;
     font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .operational-sections {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .operational-section .two-col {
+        gap: 1.25rem;
+    }
+
+    .category-label {
+        width: auto;
+        min-width: 4.5rem;
+        flex-shrink: 0;
+    }
+
+    .category-row {
+        flex-wrap: wrap;
+    }
 }
 
 .category-bar--income {

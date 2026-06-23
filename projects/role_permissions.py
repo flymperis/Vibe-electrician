@@ -43,7 +43,7 @@ SYSTEM_ROLE_DEFAULTS: dict[str, dict[str, object]] = {
         "name": "Ιδιοκτήτης",
         "description": "Διαχείριση έργων, οικονομικών, προσφορών και αναφορών.",
         "is_system": True,
-        "is_assignable": False,
+        "is_assignable": True,
         "sort_order": 2,
         "permissions": {
             PERM_ACCESS_DJANGO_ADMIN: False,

@@ -45,20 +45,18 @@
                 <th>Τίτλος</th>
                 <th>Ημερομηνία</th>
                 <th>Κατάσταση</th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for quote in quotes %}
             <tr>
                 <td>{{ quote.quote_number }}</td>
-                <td>{{ quote.title }}</td>
+                <td><a href="{% url 'projects:quote_detail' quote.pk %}">{{ quote.title }}</a></td>
                 <td>{{ quote.date|date:"d/m/Y" }}</td>
                 <td><span class="badge badge-{{ quote.status }}">{{ quote.get_status_display }}</span></td>
-                <td><a href="{% url 'projects:quote_detail' quote.pk %}" class="btn btn-sm btn-secondary">Προβολή</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="empty">Καμία προσφορά</td></tr>
+            <tr><td colspan="4" class="empty">Καμία προσφορά</td></tr>
             {% endfor %}
         </tbody>
     </table>
@@ -71,18 +69,16 @@
             <tr>
                 <th>Έργο</th>
                 <th>Κατάσταση</th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for project in projects %}
             <tr>
-                <td>{{ project.name }}</td>
+                <td><a href="{% url 'projects:project_detail' project.pk %}">{{ project.name }}</a></td>
                 <td><span class="badge badge-{{ project.status }}">{{ project.get_status_display }}</span></td>
-                <td><a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-sm btn-secondary">Άνοιγμα</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="3" class="empty">Κανένα έργο</td></tr>
+            <tr><td colspan="2" class="empty">Κανένα έργο</td></tr>
             {% endfor %}
         </tbody>
     </table>

@@ -7,7 +7,8 @@ Expects: form (QuoteForm)
     <h2 class="quote-form-section__title">Πελάτης</h2>
     <div class="quote-customer-picker">
         {% include "projects/_customer_picker.html" %}
-        <p class="form-hint">Τα παρακάτω στοιχεία αποθηκεύονται στην προσφορά (snapshot). Μπορείς να τα προσαρμόσεις ανά έργο.</p>
+        <p class="form-hint" id="customer-manual-hint"{% if form.selected_customer %} hidden{% endif %}>Συμπλήρωσε τα στοιχεία για νέο πελάτη — θα προστεθεί αυτόματα στο πελατολόγιο.</p>
+        <p class="form-hint" id="customer-selected-hint"{% if not form.selected_customer %} hidden{% endif %}>Τα στοιχεία προέρχονται από τον επιλεγμένο πελάτη και δεν επεξεργάζονται.</p>
     </div>
     <div class="quote-spec quote-spec--form">
         <div class="quote-spec__line quote-spec__line--wide">

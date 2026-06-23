@@ -28,8 +28,8 @@
 </div>
 
 {% if project.quote %}
-<p class="form-hint">
-    <a href="{% url 'projects:quote_detail' project.quote.pk %}">Προσφορά {{ project.quote.quote_number }}</a>
+<p class="form-hint project-quote-ref">
+    Προσφορά: <a href="{% url 'projects:quote_detail' project.quote.pk %}">{{ project.quote.quote_number }}</a>
 </p>
 {% endif %}
 
@@ -119,11 +119,6 @@
     {% endif %}
 </div>
 
-<div class="filter-section">
-    <h2>Φίλτρα καταχωρήσεων</h2>
-    {% include "projects/_filter_bar.html" with form=filter_form clear_url=clear_url %}
-</div>
-
 {% if category_breakdown %}
 <h2>Έξοδα ανά κατηγορία</h2>
 <div class="category-bars">
@@ -190,8 +185,9 @@
     <div class="finance-panel__lists two-col">
         <section class="finance-panel__block">
             <h2>Έσοδα</h2>
-            <div class="table-wrap">
-                <table>
+            <div class="form-card form-card-compact finance-panel__list-card">
+                <div class="table-wrap">
+                    <table>
                     <thead>
                         <tr>
                             <th>Ημερομηνία</th>
@@ -213,7 +209,7 @@
                             <td class="col-actions">
                                 {% url 'projects:project_income_edit' project.pk income.pk as income_edit_url %}
                                 {% url 'projects:project_income_delete' project.pk income.pk as income_delete_url %}
-                                {% include "projects/_finance_entry_actions.html" with edit_url=income_edit_url delete_url=income_delete_url query_string=request.GET.urlencode delete_item_label="αυτό το έσοδο" delete_amount=income.amount %}
+                                {% include "projects/_finance_entry_actions.html" with edit_url=income_edit_url delete_url=income_delete_url delete_item_label="αυτό το έσοδο" delete_amount=income.amount %}
                             </td>
                         </tr>
                         {% empty %}
@@ -221,13 +217,15 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
             </div>
         </section>
 
         <section class="finance-panel__block">
             <h2>Έξοδα έργου</h2>
-            <div class="table-wrap">
-                <table>
+            <div class="form-card form-card-compact finance-panel__list-card">
+                <div class="table-wrap">
+                    <table>
                     <thead>
                         <tr>
                             <th>Ημερομηνία</th>
@@ -247,7 +245,7 @@
                             <td class="col-actions">
                                 {% url 'projects:project_expense_edit' project.pk expense.pk as expense_edit_url %}
                                 {% url 'projects:project_expense_delete' project.pk expense.pk as expense_delete_url %}
-                                {% include "projects/_finance_entry_actions.html" with edit_url=expense_edit_url delete_url=expense_delete_url query_string=request.GET.urlencode delete_item_label="αυτό το έξοδο" delete_amount=expense.amount %}
+                                {% include "projects/_finance_entry_actions.html" with edit_url=expense_edit_url delete_url=expense_delete_url delete_item_label="αυτό το έξοδο" delete_amount=expense.amount %}
                             </td>
                         </tr>
                         {% empty %}
@@ -255,6 +253,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
             </div>
         </section>
     </div>
@@ -277,7 +276,7 @@
 </section>
 {% endif %}
 
-<section class="work-hours-section">
+<section class="work-hours-section" id="work-hours-section">
     <h2>Εργατοώρες</h2>
     <div class="two-col">
         <div class="form-card form-card-compact">

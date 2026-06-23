@@ -1,5 +1,9 @@
 /* Πίνακας γραμμών προσφοράς — μόνο web (quote detail / preview) */
 
+.quote-items-mobile {
+    display: none;
+}
+
 .quote-items-table {
     width: 100%;
     table-layout: fixed;
@@ -104,4 +108,69 @@
 
 .quote-preview .table-wrap--quote-items {
     margin-top: 0.35rem;
+}
+
+.quote-item-card {
+    margin-bottom: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.quote-item-card--empty {
+    margin: 0;
+    text-align: center;
+    color: var(--muted);
+}
+
+.quote-item-card__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+}
+
+.quote-item-card__label {
+    flex: 0 0 auto;
+    max-width: 42%;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+.quote-item-card__value {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
+    word-break: break-word;
+}
+
+.quote-item-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+@media (max-width: 1024px) {
+    .quote-items-desktop {
+        display: none;
+    }
+
+    .quote-items-mobile {
+        display: block;
+    }
+
+    .quote-preview .table-wrap--quote-items {
+        overflow-x: visible;
+    }
 }

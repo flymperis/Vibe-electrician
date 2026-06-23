@@ -28,7 +28,6 @@ from .permissions import (
 )
 from .filters import (
     build_projects_summary,
-    filter_by_date_range,
     filter_customers,
     filter_operational_expenses,
     filter_operational_incomes,
@@ -40,7 +39,6 @@ from .filters import (
 from .forms import (
     CustomerFilterForm,
     CustomerForm,
-    DateRangeFilterForm,
     OperationalExpenseForm,
     OperationalIncomeForm,
     OperationalPageFilterForm,
@@ -351,32 +349,6 @@ def _apply_project_filters(request):
     return Project.objects.all().order_by("-updated_at"), filter_form, False, Project.objects.count()
 
 
-def _apply_detail_filters(project, request):
-    filter_form = DateRangeFilterForm(request.GET or None)
-    incomes = project.incomes.select_related("income_type", "payment_method")
-    expenses = project.expenses.select_related("category")
-    work_hours_entries = project.work_hours.select_related("worker", "worker__profile").all()
-
-    if filter_form.is_valid():
-        data = filter_form.cleaned_data
-        date_from = data["date_from"]
-        date_to = data["date_to"]
-        incomes = filter_by_date_range(incomes, date_from=date_from, date_to=date_to)
-        expenses = filter_by_date_range(expenses, date_from=date_from, date_to=date_to)
-        work_hours_entries = filter_by_date_range(
-            work_hours_entries, date_from=date_from, date_to=date_to
-        )
-        if data["income_type"]:
-            incomes = incomes.filter(income_type__code=data["income_type"])
-        if data["expense_category"]:
-            expenses = expenses.filter(category__code=data["expense_category"])
-        if data["worker"]:
-            work_hours_entries = work_hours_entries.filter(worker=data["worker"])
-
-    active = filter_form.is_valid() and any(filter_form.cleaned_data.values())
-    return incomes, expenses, work_hours_entries, filter_form, active
-
-
 @owner_required
 def dashboard(request):
     today = timezone.localdate()
@@ -448,26 +420,33 @@ def project_list(request):
 
 @owner_required
 def project_create(request):
-    if request.method == "GET" and not request.GET.get("manual"):
-        messages.info(
+    if request.GET.get("manual"):
+        form = ProjectForm(request.POST or None)
+        if request.method == "POST" and form.is_valid():
+            project = form.save()
+            log_project_created(request, project)
+            messages.success(request, f"Δημιουργήθηκε το έργο «{project.name}».")
+            return redirect("projects:project_detail", pk=project.pk)
+        return render(
             request,
-            "Νέα δουλειά: φτιάξε προσφορά και μετά «Δημιουργία έργου» όταν ο πελάτης αποδεχτεί.",
+            "projects/project_form.html",
+            {
+                "form": form,
+                "title": "Νέο έργο (χειροκίνητα)",
+                "subtitle": "Κανονικά το έργο δημιουργείται από προσφορά. Χρησιμοποίησε αυτό μόνο για εξαιρέσεις.",
+            },
         )
-        return redirect("projects:quote_create")
 
-    form = ProjectForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        project = form.save()
-        log_project_created(request, project)
-        messages.success(request, f"Δημιουργήθηκε το έργο «{project.name}».")
-        return redirect("projects:project_detail", pk=project.pk)
+    quotes = (
+        Quote.objects.filter(project__isnull=True)
+        .exclude(status=Quote.STATUS_REJECTED)
+        .order_by("-date", "-created_at")
+    )
     return render(
         request,
-        "projects/project_form.html",
+        "projects/project_create.html",
         {
-            "form": form,
-            "title": "Νέο έργο (χειροκίνητα)",
-            "subtitle": "Κανονικά το έργο δημιουργείται από προσφορά. Χρησιμοποίησε αυτό μόνο για εξαιρέσεις.",
+            "quotes": quotes,
         },
     )
 
@@ -552,11 +531,11 @@ def project_delete(request, pk):
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk)
     post_url = request.path
-    if request.GET:
-        post_url = f"{post_url}?{request.GET.urlencode()}"
 
-    incomes, expenses, work_hours_entries, filter_form, filter_active = _apply_detail_filters(
-        project, request
+    incomes = project.incomes.select_related("income_type", "payment_method").order_by("-date", "-pk")
+    expenses = project.expenses.select_related("category").order_by("-date", "-pk")
+    work_hours_entries = (
+        project.work_hours.select_related("worker", "worker__profile").order_by("-date", "-pk")
     )
 
     expense_form = ProjectExpenseForm(project=project)
@@ -651,11 +630,7 @@ def project_detail(request, pk):
         "income_form": income_form,
         "work_hours_form": work_hours_form,
         "upcoming_schedules": upcoming_schedules,
-        "filter_form": filter_form,
-        "filter_active": filter_active,
-        "clear_url": reverse("projects:project_detail", kwargs={"pk": pk}),
         "post_url": post_url,
-        "query_string": dict(request.GET.items()),
     }
     return render(request, "projects/project_detail.html", context)
 
@@ -1409,12 +1384,15 @@ def _save_quote_with_lines(request, quote=None, prefill_customer=None):
         formset.save()
         if quote.project_id:
             _sync_project_from_quote(quote)
+        created_customer = getattr(form, "created_customer", None)
+        if created_customer:
+            log_customer_created(request, created_customer)
         if is_create:
             log_quote_created(request, quote)
         else:
             log_quote_updated(request, quote, before_quote, before_lines)
-        return quote, form, formset, True
-    return quote, form, formset, False
+        return quote, form, formset, True, created_customer
+    return quote, form, formset, False, None
 
 
 @owner_required
@@ -1454,10 +1432,15 @@ def quote_select_project(request):
 @owner_required
 def quote_create(request):
     prefill_customer = _resolve_customer_prefill(request)
-    quote, form, formset, saved = _save_quote_with_lines(
+    quote, form, formset, saved, created_customer = _save_quote_with_lines(
         request, prefill_customer=prefill_customer
     )
     if saved:
+        if created_customer:
+            messages.info(
+                request,
+                f"Δημιουργήθηκε νέος πελάτης «{created_customer.name}» στο πελατολόγιο.",
+            )
         messages.success(request, f"Δημιουργήθηκε η προσφορά {quote.quote_number}.")
         return redirect("projects:quote_detail", pk=quote.pk)
 
@@ -1477,8 +1460,13 @@ def quote_create(request):
 @owner_required
 def quote_edit(request, pk):
     quote = get_object_or_404(Quote.objects.prefetch_related("line_items"), pk=pk)
-    quote, form, formset, saved = _save_quote_with_lines(request, quote=quote)
+    quote, form, formset, saved, created_customer = _save_quote_with_lines(request, quote=quote)
     if saved:
+        if created_customer:
+            messages.info(
+                request,
+                f"Δημιουργήθηκε νέος πελάτης «{created_customer.name}» στο πελατολόγιο.",
+            )
         messages.success(request, "Η προσφορά ενημερώθηκε.")
         return redirect("projects:quote_detail", pk=quote.pk)
     return render(

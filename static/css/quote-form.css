@@ -303,3 +303,10 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+.quote-form .quote-spec__field input.is-readonly,
+.quote-form .quote-spec__field input[readonly] {
+    background-color: var(--surface-muted, #f3f4f6);
+    color: var(--text-muted, #6b7280);
+    cursor: default;
+}

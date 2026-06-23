@@ -1,44 +1,89 @@
-<table class="quote-items-table">
-    <colgroup>
-        <col class="quote-items-table__col-num">
-        <col class="quote-items-table__col-desc">
-        <col class="quote-items-table__col-cat">
-        <col class="quote-items-table__col-qty">
-        <col class="quote-items-table__col-unit">
-        <col class="quote-items-table__col-price">
-        <col class="quote-items-table__col-total">
-    </colgroup>
-    <thead>
-        <tr>
-            <th class="col-num">#</th>
-            <th class="col-desc">Περιγραφή</th>
-            <th class="col-cat">Κατηγορία</th>
-            <th class="col-qty">Ποσ.</th>
-            <th class="col-unit">Μον.</th>
-            <th class="col-price">Τιμή</th>
-            <th class="col-total">Σύνολο</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in line_items %}
-        <tr>
-            <td class="col-num">{{ forloop.counter }}</td>
-            <td class="col-desc">{{ item.description }}</td>
-            <td class="col-cat">{{ item.category.label }}</td>
-            <td class="col-qty num">{{ item.quantity|floatformat:2 }}</td>
-            <td class="col-unit">{{ item.unit.label }}</td>
-            <td class="col-price num">{% if item.unit_price %}{{ item.unit_price|floatformat:2 }} €{% else %}—{% endif %}</td>
-            <td class="col-total num">{% if item.unit_price %}{{ item.line_total|floatformat:2 }} €{% else %}—{% endif %}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="7" class="empty">Δεν υπάρχουν γραμμές</td></tr>
-        {% endfor %}
-    </tbody>
-    <tfoot>
-        <tr class="quote-items-table__total-row">
-            <td colspan="5"></td>
-            <td class="col-price num"><strong>Σύνολο</strong></td>
-            <td class="col-total num"><strong>{{ quote.total|floatformat:2 }} €</strong></td>
-        </tr>
-    </tfoot>
-</table>
+<div class="quote-items-desktop">
+    <table class="quote-items-table">
+        <colgroup>
+            <col class="quote-items-table__col-num">
+            <col class="quote-items-table__col-desc">
+            <col class="quote-items-table__col-cat">
+            <col class="quote-items-table__col-qty">
+            <col class="quote-items-table__col-unit">
+            <col class="quote-items-table__col-price">
+            <col class="quote-items-table__col-total">
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="col-num">#</th>
+                <th class="col-desc">Περιγραφή</th>
+                <th class="col-cat">Κατηγορία</th>
+                <th class="col-qty">Ποσ.</th>
+                <th class="col-unit">Μον.</th>
+                <th class="col-price">Τιμή</th>
+                <th class="col-total">Σύνολο</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in line_items %}
+            <tr>
+                <td class="col-num">{{ forloop.counter }}</td>
+                <td class="col-desc">{{ item.description }}</td>
+                <td class="col-cat">{{ item.category.label }}</td>
+                <td class="col-qty num">{{ item.quantity|floatformat:2 }}</td>
+                <td class="col-unit">{{ item.unit.label }}</td>
+                <td class="col-price num">{% if item.unit_price %}{{ item.unit_price|floatformat:2 }} €{% else %}—{% endif %}</td>
+                <td class="col-total num">{% if item.unit_price %}{{ item.line_total|floatformat:2 }} €{% else %}—{% endif %}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="empty">Δεν υπάρχουν γραμμές</td></tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="quote-items-table__total-row">
+                <td colspan="5"></td>
+                <td class="col-price num"><strong>Σύνολο</strong></td>
+                <td class="col-total num"><strong>{{ quote.total|floatformat:2 }} €</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<div class="quote-items-mobile">
+    {% for item in line_items %}
+    <article class="quote-item-card">
+        <div class="quote-item-card__row">
+            <span class="quote-item-card__label">#</span>
+            <span class="quote-item-card__value">{{ forloop.counter }}</span>
+        </div>
+        <div class="quote-item-card__row">
+            <span class="quote-item-card__label">Περιγραφή</span>
+            <span class="quote-item-card__value">{{ item.description }}</span>
+        </div>
+        <div class="quote-item-card__row">
+            <span class="quote-item-card__label">Κατηγορία</span>
+            <span class="quote-item-card__value">{{ item.category.label }}</span>
+        </div>
+        <div class="quote-item-card__row">
+            <span class="quote-item-card__label">Ποσ.</span>
+            <span class="quote-item-card__value num">{{ item.quantity|floatformat:2 }}</span>
+        </div>
+        <div class="quote-item-card__row">
+            <span class="quote-item-card__label">Μον.</span>
+            <span class="quote-item-card__value">{{ item.unit.label }}</span>
+        </div>
+        <div class="quote-item-card__row">
+            <span class="quote-item-card__label">Τιμή</span>
+            <span class="quote-item-card__value num">{% if item.unit_price %}{{ item.unit_price|floatformat:2 }} €{% else %}—{% endif %}</span>
+        </div>
+        <div class="quote-item-card__row">
+            <span class="quote-item-card__label">Σύνολο</span>
+            <span class="quote-item-card__value num">{% if item.unit_price %}{{ item.line_total|floatformat:2 }} €{% else %}—{% endif %}</span>
+        </div>
+    </article>
+    {% empty %}
+    <p class="quote-item-card quote-item-card--empty">Δεν υπάρχουν γραμμές</p>
+    {% endfor %}
+    {% if line_items %}
+    <div class="quote-item-total">
+        <span class="quote-item-card__label">Σύνολο</span>
+        <strong class="quote-item-card__value num">{{ quote.total|floatformat:2 }} €</strong>
+    </div>
+    {% endif %}
+</div>

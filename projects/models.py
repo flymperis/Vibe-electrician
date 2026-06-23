@@ -27,7 +27,7 @@ class Role(models.Model):
     is_assignable = models.BooleanField(
         "Εμφάνιση ως εργαζόμενος",
         default=False,
-        help_text="Εμφανίζεται στις επιλογές εργαζομένων (ώρες, ημερολόγιο).",
+        help_text="Εμφανίζεται στις επιλογές εργαζομένων (ώρες, ημερολόγιο) — π.χ. εργαζόμενοι και ιδιοκτήτες.",
     )
     sort_order = models.PositiveSmallIntegerField("Σειρά", default=0)
 

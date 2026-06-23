@@ -10,6 +10,8 @@
     const selectedBox = document.getElementById("customer-selected");
     const selectedLabel = document.getElementById("customer-selected-label");
     const clearBtn = document.getElementById("customer-clear-btn");
+    const manualHint = document.getElementById("customer-manual-hint");
+    const selectedHint = document.getElementById("customer-selected-hint");
 
     const fields = ["client_name", "client_vat", "client_phone", "client_email", "address"];
 
@@ -23,8 +25,31 @@
         if (el) el.value = value || "";
     }
 
+    function setFieldsReadonly(readonly) {
+        fields.forEach((name) => {
+            const el = document.getElementById("id_" + name);
+            if (!el) return;
+            if (readonly) {
+                el.setAttribute("readonly", "readonly");
+                el.classList.add("is-readonly");
+            } else {
+                el.removeAttribute("readonly");
+                el.classList.remove("is-readonly");
+            }
+        });
+    }
+
+    function setHintMode(selected) {
+        if (manualHint) manualHint.hidden = selected;
+        if (selectedHint) selectedHint.hidden = !selected;
+    }
+
     function fillSnapshot(data) {
         fields.forEach((name) => setField(name, data[name]));
+    }
+
+    function clearSnapshot() {
+        fields.forEach((name) => setField(name, ""));
     }
 
     function showSearch() {
@@ -32,6 +57,9 @@
         selectedBox.hidden = true;
         searchInput.value = "";
         hiddenInput.value = "";
+        clearSnapshot();
+        setFieldsReadonly(false);
+        setHintMode(false);
         hideResults();
         searchInput.focus();
     }
@@ -76,6 +104,8 @@
     function selectCustomer(item) {
         hiddenInput.value = String(item.id);
         fillSnapshot(item);
+        setFieldsReadonly(true);
+        setHintMode(true);
         showSelected(item.label);
     }
 
@@ -132,5 +162,13 @@
 
     if (clearBtn) {
         clearBtn.addEventListener("click", showSearch);
+    }
+
+    if (hiddenInput.value) {
+        setFieldsReadonly(true);
+        setHintMode(true);
+    } else {
+        setFieldsReadonly(false);
+        setHintMode(false);
     }
 })();

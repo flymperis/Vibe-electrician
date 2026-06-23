@@ -223,7 +223,14 @@ class WorkHoursForm(forms.ModelForm):
         fields = ["project", "date", "hours", "worker", "description"]
         widgets = {
             "date": date_widget(),
-            "hours": forms.NumberInput(attrs={"step": "0.5", "min": "0.5", "placeholder": "π.χ. 8"}),
+            "hours": forms.NumberInput(
+                attrs={
+                    "step": "0.5",
+                    "min": "0.5",
+                    "placeholder": "π.χ. 8",
+                    "inputmode": "decimal",
+                }
+            ),
             "description": forms.TextInput(attrs={"placeholder": "π.χ. Τοποθέτηση πίνακα"}),
         }
 
@@ -477,6 +484,15 @@ QUOTE_OPEN_STATUS_CHOICES = [
 ]
 
 
+QUOTE_CUSTOMER_SNAPSHOT_FIELDS = (
+    "client_name",
+    "client_vat",
+    "client_phone",
+    "client_email",
+    "address",
+)
+
+
 class QuoteForm(forms.ModelForm):
     class Meta:
         model = Quote
@@ -545,6 +561,28 @@ class QuoteForm(forms.ModelForm):
         if not self.data and not self.initial.get("valid_until"):
             self.fields["valid_until"].initial = timezone.localdate() + timedelta(days=30)
 
+        if self.selected_customer:
+            self._set_customer_snapshot_fields_readonly(True)
+
+        self.created_customer = None
+
+    def _set_customer_snapshot_fields_readonly(self, readonly: bool) -> None:
+        for name in QUOTE_CUSTOMER_SNAPSHOT_FIELDS:
+            field = self.fields.get(name)
+            if not field:
+                continue
+            if readonly:
+                field.widget.attrs["readonly"] = "readonly"
+                css = field.widget.attrs.get("class", "")
+                if "is-readonly" not in css.split():
+                    field.widget.attrs["class"] = f"{css} is-readonly".strip()
+            else:
+                field.widget.attrs.pop("readonly", None)
+                css = field.widget.attrs.get("class", "")
+                field.widget.attrs["class"] = " ".join(
+                    part for part in css.split() if part != "is-readonly"
+                )
+
     def clean(self):
         cleaned = super().clean()
         quote_date = cleaned.get("date")
@@ -555,11 +593,40 @@ class QuoteForm(forms.ModelForm):
                 "Η «Ισχύς έως» δεν μπορεί να είναι πριν την ημερομηνία προσφοράς.",
             )
         customer = cleaned.get("customer")
-        if not self.instance.pk and not customer:
-            self.add_error("customer", "Επίλεξε πελάτη από το πελατολόγιο.")
-        if customer and not cleaned.get("client_name"):
-            cleaned["client_name"] = customer.name
+        if customer:
+            cleaned.update(customer.to_quote_snapshot())
+        else:
+            client_name = (cleaned.get("client_name") or "").strip()
+            if not client_name:
+                self.add_error(
+                    "client_name",
+                    "Συμπλήρωσε στοιχεία πελάτη ή επίλεξε από το πελατολόγιο.",
+                )
+            else:
+                cleaned["client_name"] = client_name
+                vat = (cleaned.get("client_vat") or "").strip()
+                cleaned["client_vat"] = vat
+                if vat and Customer.objects.filter(vat__iexact=vat, is_active=True).exists():
+                    self.add_error(
+                        "client_vat",
+                        "Υπάρχει ήδη ενεργός πελάτης με αυτό το ΑΦΜ — επίλεξέ τον από το πελατολόγιο.",
+                    )
         return cleaned
+
+    def save(self, commit=True):
+        quote = super().save(commit=False)
+        if not quote.customer_id:
+            quote.customer = Customer.objects.create(
+                name=self.cleaned_data["client_name"],
+                vat=self.cleaned_data.get("client_vat") or "",
+                phone=(self.cleaned_data.get("client_phone") or "").strip(),
+                email=(self.cleaned_data.get("client_email") or "").strip(),
+                address=(self.cleaned_data.get("address") or "").strip(),
+            )
+            self.created_customer = quote.customer
+        if commit:
+            quote.save()
+        return quote
 
     def clean_manual_total(self):
         value = self.cleaned_data.get("manual_total")
