@@ -1,0 +1,25 @@
+{% comment %}
+Single-week calendar grid. Expects: weekday_labels, week_days (list of day dicts).
+{% endcomment %}
+<div class="calendar-grid-wrap{% if compact %} calendar-grid-wrap--compact{% endif %}">
+    <div class="calendar-grid calendar-grid--week">
+        {% for label in weekday_labels %}
+        <div class="calendar-weekday">{{ label }}</div>
+        {% endfor %}
+        {% for day in week_days %}
+        <a href="{{ day.url }}" class="calendar-day{% if day.is_today %} calendar-day--today{% endif %}">
+            <span class="calendar-day__number">{{ day.date.day }}</span>
+            <div class="calendar-day__events">
+                {% for schedule in day.schedules %}
+                <span class="calendar-event calendar-event--color-{{ schedule.calendar_color_index }} calendar-event--{{ schedule.status }}">
+                    {{ schedule.title|truncatechars:22 }}
+                </span>
+                {% endfor %}
+                {% if day.extra_count %}
+                <span class="calendar-event calendar-event--more">+{{ day.extra_count }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>

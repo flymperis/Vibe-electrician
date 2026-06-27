@@ -21,26 +21,6 @@
     <a href="{{ next_url }}" class="btn btn-secondary btn-sm">Επόμενος →</a>
 </div>
 
-<form method="get" class="filter-bar filter-bar--many">
-    <input type="hidden" name="year" value="{{ period.year }}">
-    <input type="hidden" name="month" value="{{ period.month }}">
-    {% if selected_date %}
-    <input type="hidden" name="day" value="{{ selected_date|date:'Y-m-d' }}">
-    {% endif %}
-    {% for field in filter_form %}
-    <label class="filter-field{% if field.name == 'q' %} filter-field-wide{% endif %}">
-        {{ field.label }}
-        {{ field }}
-    </label>
-    {% endfor %}
-    <div class="filter-actions">
-        <button type="submit" class="btn btn-primary btn-sm">Εφαρμογή</button>
-        {% if filter_active %}
-        <a href="{% url 'projects:work_calendar' %}?year={{ period.year }}&month={{ period.month }}{% if selected_date %}&day={{ selected_date|date:'Y-m-d' }}{% endif %}" class="btn btn-secondary btn-sm">Καθαρισμός</a>
-        {% endif %}
-    </div>
-</form>
-
 {% if today_schedules %}
 <div class="calendar-today-banner">
     <strong>Σήμερα:</strong>

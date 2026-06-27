@@ -282,7 +282,9 @@ class WorkScheduleForm(forms.ModelForm):
             "start_time": forms.TimeInput(attrs={"type": "time"}),
             "end_time": forms.TimeInput(attrs={"type": "time"}),
             "location": forms.TextInput(attrs={"placeholder": "Διεύθυνση ή τοποθεσία"}),
-            "title": forms.TextInput(attrs={"placeholder": "π.χ. Τοποθέτηση πίνακα"}),
+            "title": forms.TextInput(
+                attrs={"placeholder": "Κενό = όνομα έργου"}
+            ),
             "notes": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -292,6 +294,7 @@ class WorkScheduleForm(forms.ModelForm):
             status=Project.STATUS_CANCELLED
         ).order_by("name")
         self.fields["project"].required = False
+        self.fields["title"].required = False
         self.fields["workers"].queryset = assignable_workers_queryset()
         self.fields["workers"].label_from_instance = user_display_name
         if project:
@@ -305,6 +308,9 @@ class WorkScheduleForm(forms.ModelForm):
             self.fields["status"].initial = WorkSchedule.STATUS_SCHEDULED
         if self.instance.pk:
             self.fields["workers"].initial = self.instance.workers.all()
+
+    def clean_title(self):
+        return (self.cleaned_data.get("title") or "").strip()
 
     def clean(self):
         cleaned = super().clean()

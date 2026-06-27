@@ -10,83 +10,28 @@
 
 <h1>Dashboard</h1>
 
-<p class="subtitle">Γρήγορες ενέργειες &amp; επισκόπηση {{ current_month_label }}</p>
+<p class="subtitle">Γρήγορες ενέργειες &amp; επισκόπηση · {{ current_week_label }}</p>
 
-
-
-<div class="stats-grid stats-grid--dashboard">
-
-    <div class="stat-card stat-profit">
-
-        <div class="stat-label">Καθαρό {{ current_month_label }}</div>
-
-        <div class="stat-value {% if month_profit < 0 %}negative{% endif %}">{{ month_profit|floatformat:2 }} €</div>
-
-    </div>
-
-    <div class="stat-card stat-income">
-
-        <div class="stat-label">Έσοδα μήνα</div>
-
-        <div class="stat-value">{{ month_total_income|floatformat:2 }} €</div>
-
-    </div>
-
-    <div class="stat-card stat-expense">
-
-        <div class="stat-label">Έξοδα μήνα</div>
-
-        <div class="stat-value">{{ month_total_expenses|floatformat:2 }} €</div>
-
-    </div>
-
-    <div class="stat-card">
-
-        <div class="stat-label">Ενεργά έργα</div>
-
-        <div class="stat-value stat-value-sm">
-
-            <a href="{% url 'projects:project_list' %}">{{ active_projects_count }}</a>
-
+<section class="dashboard-section dashboard-section--week">
+    <div class="page-header page-header--tight">
+        <h2>Τρέχουσα εβδομάδα</h2>
+        <div class="page-actions">
+            <a href="{{ calendar_url }}" class="btn btn-secondary btn-sm">Πλήρες ημερολόγιο</a>
         </div>
-
     </div>
+    {% include "projects/_calendar_week_grid.html" with week_days=dashboard_week_days compact=True %}
+</section>
 
-    {% if pending_quotes_count %}
-
-    <div class="stat-card">
-
+<div class="stats-grid stats-grid--dashboard stats-grid--summary">
+    <a href="{{ open_projects_url }}" class="stat-card stat-card--action">
+        <div class="stat-label">Ανοιχτά έργα</div>
+        <div class="stat-value stat-value-sm">{{ active_projects_count }}</div>
+    </a>
+    <a href="{{ open_quotes_url }}" class="stat-card stat-card--action">
         <div class="stat-label">Ανοιχτές προσφορές</div>
-
-        <div class="stat-value stat-value-sm">
-
-            <a href="{% url 'projects:quote_list' %}?status=draft">{{ pending_quotes_count }}</a>
-
-        </div>
-
-    </div>
-
-    {% endif %}
-
-    {% if today_schedule_count %}
-
-    <div class="stat-card">
-
-        <div class="stat-label">Εργασίες σήμερα</div>
-
-        <div class="stat-value stat-value-sm">
-
-            <a href="{% url 'projects:work_calendar' %}?year={{ today.year }}&month={{ today.month }}&day={{ today|date:'Y-m-d' }}">{{ today_schedule_count }}</a>
-
-        </div>
-
-    </div>
-
-    {% endif %}
-
+        <div class="stat-value stat-value-sm">{{ open_quotes_count }}</div>
+    </a>
 </div>
-
-
 
 <section class="dashboard-section">
 
@@ -335,38 +280,6 @@
     </div>
 
 </section>
-
-
-
-{% if today_schedules %}
-
-<section class="dashboard-section">
-
-    <div class="page-header page-header--tight">
-
-        <h2>Σημερινές εργασίες</h2>
-
-        <div class="page-actions">
-
-            <a href="{% url 'projects:work_calendar' %}?year={{ today.year }}&month={{ today.month }}&day={{ today|date:'Y-m-d' }}" class="btn btn-secondary btn-sm">Ημερολόγιο</a>
-
-        </div>
-
-    </div>
-
-    <div class="schedule-list schedule-list--compact">
-
-        {% for schedule in today_schedules %}
-
-        {% include "projects/_work_schedule_card.html" with schedule=schedule %}
-
-        {% endfor %}
-
-    </div>
-
-</section>
-
-{% endif %}
 
 {% endblock %}
 

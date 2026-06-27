@@ -16,8 +16,11 @@ from django.utils import timezone
 from .calendar_utils import (
     WEEKDAY_LABELS,
     build_calendar_weeks,
+    build_forward_days,
+    format_week_range_label,
     parse_calendar_month,
     parse_selected_date,
+    weekday_label,
 )
 from .ui_strings import get_ui
 from .permissions import (
@@ -33,7 +36,6 @@ from .filters import (
     filter_operational_incomes,
     filter_projects,
     filter_quotes,
-    filter_work_schedules,
     get_filter_params,
 )
 from .forms import (
@@ -50,7 +52,6 @@ from .forms import (
     QuoteForm,
     make_quote_line_formset,
     WorkHoursForm,
-    WorkScheduleFilterForm,
     WorkScheduleForm,
     UserPreferencesForm,
 )
@@ -85,6 +86,7 @@ from .activity_log import (
     quote_lines_snapshot,
     work_schedule_snapshot,
 )
+from .delete_confirm import password_confirmed_for_delete, redirect_after_failed_delete
 from .models import (
     Customer,
     Expense,
@@ -161,11 +163,6 @@ def _paginate(
         params[page_param] = page_obj.next_page_number()
         nav["next"] = "?" + params.urlencode() + hash_suffix
     return page_obj, nav
-
-
-def _calendar_filter_params(request) -> dict[str, str]:
-    keys = ("q", "project", "status", "worker")
-    return {key: request.GET.get(key, "").strip() for key in keys if request.GET.get(key, "").strip()}
 
 
 def _calendar_url(
@@ -352,54 +349,51 @@ def _apply_project_filters(request):
 @owner_required
 def dashboard(request):
     today = timezone.localdate()
-    active_projects = Project.objects.filter(status__in=OPEN_DASHBOARD_STATUSES)
+    week_days = build_forward_days(today)
+    week_start = week_days[0]
+    week_end = week_days[-1] + timedelta(days=1)
 
-    month_income = Income.objects.filter(
-        date__year=today.year,
-        date__month=today.month,
-    ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+    schedules_qs = (
+        WorkSchedule.objects.filter(date__gte=week_start, date__lt=week_end)
+        .select_related("project")
+        .prefetch_related("workers")
+        .order_by("date", "start_time", "title")
+    )
+    schedules_by_date: dict[date, list[WorkSchedule]] = {}
+    for schedule in schedules_qs:
+        schedules_by_date.setdefault(schedule.date, []).append(schedule)
 
-    month_project_expenses = Expense.objects.filter(
-        date__year=today.year,
-        date__month=today.month,
-    ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
-
-    month_operational_expenses = OperationalExpense.objects.filter(
-        date__year=today.year,
-        date__month=today.month,
-    ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
-
-    month_operational_incomes = OperationalIncome.objects.filter(
-        date__year=today.year,
-        date__month=today.month,
-    ).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
-
-    month_total_expenses = month_project_expenses + month_operational_expenses
-    month_total_income = month_income + month_operational_incomes
-
-    today_schedule_count = WorkSchedule.objects.filter(
-        date=today,
-        status=WorkSchedule.STATUS_SCHEDULED,
-    ).count()
-    today_schedules = WorkSchedule.objects.filter(
-        date=today,
-        status=WorkSchedule.STATUS_SCHEDULED,
-    ).select_related("project").order_by("start_time", "title")[:5]
-
-    pending_quotes_count = Quote.objects.filter(
-        status__in=(Quote.STATUS_DRAFT, Quote.STATUS_SENT)
-    ).count()
+    dashboard_week_days = []
+    for day in week_days:
+        day_schedules = schedules_by_date.get(day, [])
+        dashboard_week_days.append(
+            {
+                "date": day,
+                "is_today": day == today,
+                "schedules": day_schedules[:3],
+                "extra_count": max(0, len(day_schedules) - 3),
+                "url": _calendar_url(year=day.year, month=day.month, day=day),
+            }
+        )
 
     context = {
-        "active_projects_count": active_projects.count(),
-        "pending_quotes_count": pending_quotes_count,
-        "month_total_income": month_total_income,
-        "month_total_expenses": month_total_expenses,
-        "month_profit": month_total_income - month_total_expenses,
-        "current_month_label": today.strftime("%B %Y"),
         "today": today,
-        "today_schedule_count": today_schedule_count,
-        "today_schedules": today_schedules,
+        "weekday_labels": [weekday_label(day) for day in week_days],
+        "dashboard_week_days": dashboard_week_days,
+        "current_week_label": format_week_range_label(week_days),
+        "calendar_url": _calendar_url(year=today.year, month=today.month, day=today),
+        "active_projects_count": Project.objects.filter(
+            status__in=OPEN_DASHBOARD_STATUSES
+        ).count(),
+        "open_quotes_count": Quote.objects.filter(
+            status__in=(Quote.STATUS_DRAFT, Quote.STATUS_SENT)
+        ).count(),
+        "open_projects_url": (
+            f"{reverse('projects:project_list')}?{urlencode([('status', Project.STATUS_QUOTE), ('status', Project.STATUS_IN_PROGRESS)], doseq=True)}"
+        ),
+        "open_quotes_url": (
+            f"{reverse('projects:quote_list')}?{urlencode([('status', Quote.STATUS_DRAFT), ('status', Quote.STATUS_SENT)], doseq=True)}"
+        ),
     }
     return render(request, "projects/dashboard.html", context)
 
@@ -880,34 +874,12 @@ def operational_expenses(request):
     return render(request, "projects/operational.html", context)
 
 
-def _apply_work_schedule_filters(request, qs):
-    filter_form = WorkScheduleFilterForm(request.GET or None)
-    q = project = status = worker = ""
-    filter_active = False
-    if filter_form.is_valid():
-        data = filter_form.cleaned_data
-        q = data["q"]
-        project = data["project"]
-        status = data["status"]
-        worker = data["worker"]
-        filter_active = any(data.values())
-    qs = filter_work_schedules(
-        qs,
-        q=q,
-        project=project,
-        status=status,
-        worker=worker,
-    )
-    return qs, filter_form, filter_active
-
-
 @login_required
 def work_calendar(request):
     period = parse_calendar_month(request)
     year = period["year"]
     month = period["month"]
     today = period["today"]
-    filter_params = _calendar_filter_params(request)
 
     weeks = build_calendar_weeks(year, month)
     grid_start = weeks[0][0]
@@ -917,7 +889,6 @@ def work_calendar(request):
         date__gte=grid_start,
         date__lt=grid_end,
     ).select_related("project").prefetch_related("workers")
-    schedules_qs, filter_form, filter_active = _apply_work_schedule_filters(request, schedules_qs)
 
     schedules_by_date: dict[date, list[WorkSchedule]] = {}
     for schedule in schedules_qs.order_by("date", "start_time", "title"):
@@ -941,7 +912,6 @@ def work_calendar(request):
                         year=year,
                         month=month,
                         day=day,
-                        filter_params=filter_params,
                     ),
                 }
             )
@@ -949,9 +919,12 @@ def work_calendar(request):
 
     day_schedules = schedules_by_date.get(selected_date, []) if selected_date else []
 
-    today_schedules_qs = WorkSchedule.objects.filter(date=today).select_related("project").prefetch_related("workers")
-    today_schedules_qs, _, _ = _apply_work_schedule_filters(request, today_schedules_qs)
-    today_schedules = today_schedules_qs.order_by("start_time", "title")
+    today_schedules = (
+        WorkSchedule.objects.filter(date=today)
+        .select_related("project")
+        .prefetch_related("workers")
+        .order_by("start_time", "title")
+    )
 
     context = {
         "period": period,
@@ -960,24 +933,18 @@ def work_calendar(request):
         "selected_date": selected_date,
         "day_schedules": day_schedules,
         "today_schedules": today_schedules,
-        "filter_form": filter_form,
-        "filter_active": filter_active,
-        "filter_params": filter_params,
         "prev_url": _calendar_url(
             year=period["prev_year"],
             month=period["prev_month"],
             day=selected_date if selected_date and selected_date.month == period["prev_month"] else None,
-            filter_params=filter_params,
         ),
         "next_url": _calendar_url(
             year=period["next_year"],
             month=period["next_month"],
             day=selected_date if selected_date and selected_date.month == period["next_month"] else None,
-            filter_params=filter_params,
         ),
-        "today_url": _calendar_url(year=today.year, month=today.month, day=today, filter_params=filter_params),
+        "today_url": _calendar_url(year=today.year, month=today.month, day=today),
         "create_url": reverse("projects:work_schedule_create"),
-        "clear_url": reverse("projects:work_calendar"),
         "can_manage_schedules": can_manage_schedules(request.user),
     }
     return render(request, "projects/work_calendar.html", context)
@@ -1122,10 +1089,12 @@ def monthly_report(request):
     project_expenses = Expense.objects.filter(date__gte=start, date__lt=end)
     operational_expenses = OperationalExpense.objects.filter(date__gte=start, date__lt=end)
     operational_incomes = OperationalIncome.objects.filter(date__gte=start, date__lt=end)
+    work_hours = WorkHours.objects.filter(date__gte=start, date__lt=end)
 
     if project_id:
         incomes = incomes.filter(project_id=project_id)
         project_expenses = project_expenses.filter(project_id=project_id)
+        work_hours = work_hours.filter(project_id=project_id)
     if search_q:
         incomes = incomes.filter(
             Q(project__name__icontains=search_q) | Q(description__icontains=search_q)
@@ -1141,8 +1110,13 @@ def monthly_report(request):
         operational_incomes = operational_incomes.filter(
             Q(source__icontains=search_q) | Q(description__icontains=search_q)
         )
+        work_hours = work_hours.filter(
+            Q(project__name__icontains=search_q) | Q(description__icontains=search_q)
+        )
 
     total_income = incomes.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+    total_income_cash = _sum_incomes_by_payment(incomes, Income.PAY_CASH)
+    total_income_card = _sum_incomes_by_payment(incomes, Income.PAY_CARD)
     total_operational_incomes = operational_incomes.aggregate(total=Sum("amount"))[
         "total"
     ] or Decimal("0.00")
@@ -1152,8 +1126,10 @@ def monthly_report(request):
     total_operational_expenses = operational_expenses.aggregate(total=Sum("amount"))[
         "total"
     ] or Decimal("0.00")
+    total_work_hours = work_hours.aggregate(total=Sum("hours"))["total"] or Decimal("0.00")
     total_expenses = total_project_expenses + total_operational_expenses
     total_all_income = total_income + total_operational_incomes
+    total_profit = total_all_income - total_expenses
 
     trend_data = _build_report_trend(year, period["is_full_year"], project_id, search_q)
 
@@ -1168,10 +1144,14 @@ def monthly_report(request):
         "is_full_year": period["is_full_year"],
         "trend_data": trend_data,
         "total_income": total_income,
+        "total_income_cash": total_income_cash,
+        "total_income_card": total_income_card,
         "total_operational_incomes": total_operational_incomes,
         "total_project_expenses": total_project_expenses,
         "total_operational_expenses": total_operational_expenses,
-        "total_profit": total_all_income - total_expenses,
+        "total_work_hours": total_work_hours,
+        "total_profit": total_profit,
+        "total_profit_margin": _profit_margin(total_all_income, total_profit),
         "years": range(timezone.localdate().year - 2, timezone.localdate().year + 2),
         "month_options": month_choices(),
         "projects": Project.objects.all(),
@@ -1187,6 +1167,12 @@ def _profit_margin(income: Decimal, profit: Decimal) -> Decimal | None:
     if income <= 0:
         return None
     return (profit / income) * 100
+
+
+def _sum_incomes_by_payment(incomes, code: str) -> Decimal:
+    return incomes.filter(payment_method__code=code).aggregate(total=Sum("amount"))[
+        "total"
+    ] or Decimal("0.00")
 
 
 def _build_report_trend(year, is_full_year, project_id, search_q):

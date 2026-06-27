@@ -110,11 +110,22 @@
 
 <div class="stats-grid">
 
-    <div class="stat-card stat-income">
+    <div class="stat-card stat-income stat-card--split">
 
         <div class="stat-label">Έσοδα έργων</div>
 
         <div class="stat-value">{{ total_income|floatformat:2 }} €</div>
+
+        <dl class="stat-split">
+            <div class="stat-split__row">
+                <dt>Μετρητά</dt>
+                <dd>{{ total_income_cash|floatformat:2 }} €</dd>
+            </div>
+            <div class="stat-split__row">
+                <dt>Κάρτα</dt>
+                <dd>{{ total_income_card|floatformat:2 }} €</dd>
+            </div>
+        </dl>
 
     </div>
 
@@ -142,11 +153,31 @@
 
     </div>
 
+    <div class="stat-card stat-hours">
+
+        <div class="stat-label">Εργατοώρες</div>
+
+        <div class="stat-value">{{ total_work_hours|floatformat:1 }} ωρ.</div>
+
+    </div>
+
     <div class="stat-card stat-profit">
 
         <div class="stat-label">Καθαρό αποτέλεσμα</div>
 
         <div class="stat-value {% if total_profit < 0 %}negative{% endif %}">{{ total_profit|floatformat:2 }} €</div>
+
+    </div>
+
+    <div class="stat-card stat-profit">
+
+        <div class="stat-label">Κέρδος %</div>
+
+        <div class="stat-value {% if total_profit_margin is not None and total_profit_margin < 0 %}negative{% endif %}">
+
+            {% if total_profit_margin is not None %}{{ total_profit_margin|floatformat:1 }}%{% else %}—{% endif %}
+
+        </div>
 
     </div>
 

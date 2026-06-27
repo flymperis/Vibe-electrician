@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import calendar
-from datetime import date
+from datetime import date, timedelta
 
 from django.utils import timezone
 
@@ -70,3 +70,25 @@ def parse_selected_date(request, *, year: int, month: int, today: date) -> date 
 def build_calendar_weeks(year: int, month: int) -> list[list[date]]:
     cal = calendar.Calendar(firstweekday=0)
     return cal.monthdatescalendar(year, month)
+
+
+def weekday_label(day: date) -> str:
+    return WEEKDAY_LABELS[day.weekday()]
+
+
+def build_forward_days(today: date, *, extra_days: int = 6) -> list[date]:
+    """Σήμερα και τις επόμενες extra_days ημέρες (7 σύνολο με default)."""
+    return [today + timedelta(days=offset) for offset in range(extra_days + 1)]
+
+
+def format_week_range_label(week_days: list[date]) -> str:
+    start = week_days[0]
+    end = week_days[-1]
+    if start.year != end.year:
+        return (
+            f"{start.day} {MONTH_NAMES[start.month]} {start.year} – "
+            f"{end.day} {MONTH_NAMES[end.month]} {end.year}"
+        )
+    if start.month != end.month:
+        return f"{start.day} {MONTH_NAMES[start.month]} – {end.day} {MONTH_NAMES[end.month]} {end.year}"
+    return f"{start.day}–{end.day} {MONTH_NAMES[start.month]} {start.year}"
