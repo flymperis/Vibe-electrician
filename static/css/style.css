@@ -1597,18 +1597,41 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
 
 .operational-sections {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
     align-items: start;
+    max-width: 100%;
+    min-width: 0;
+}
+
+@media (min-width: 960px) {
+    .operational-sections {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
 }
 
 .operational-section {
     min-width: 0;
+    max-width: 100%;
 }
 
 .operational-section .two-col {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.operational-section #operational-expense-form,
+.operational-section #operational-income-form {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.operational-section .form-card {
+    max-width: 100%;
+    min-width: 0;
 }
 
 .operational-section h2 {
@@ -1628,10 +1651,12 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
 .operational-section .table-wrap {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
 }
 
 .operational-section .table-wrap table {
     width: 100%;
+    min-width: 0;
     table-layout: fixed;
 }
 
@@ -1658,10 +1683,33 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
     overflow-wrap: anywhere;
 }
 
-@media (max-width: 768px) {
-    .operational-sections {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
+@media (max-width: 959px) {
+    .operational-page .filter-bar,
+    .operational-page .stats-grid,
+    .operational-page .operational-sections,
+    .operational-page .operational-section,
+    .operational-page .form-card,
+    .operational-page .table-wrap,
+    .operational-page .pagination {
+        max-width: 100%;
+        min-width: 0;
+    }
+
+    .operational-page .operational-sections {
+        overflow-x: clip;
+    }
+
+    .operational-page .table-wrap {
+        overflow-x: hidden;
+    }
+
+    .operational-page .table-wrap .num {
+        white-space: normal;
+    }
+
+    .operational-section .table-wrap th:nth-child(1),
+    .operational-section .table-wrap td:nth-child(1) {
+        white-space: normal;
     }
 
     .operational-section .two-col {
@@ -1700,8 +1748,25 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
         flex-shrink: 0;
     }
 
+    .category-amount {
+        width: auto;
+        min-width: 0;
+        flex-shrink: 0;
+    }
+
     .category-row {
         flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .operational-sections {
+        gap: 2.5rem;
     }
 }
 
