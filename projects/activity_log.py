@@ -641,6 +641,30 @@ def log_operational_income_created(request, income: OperationalIncome) -> None:
     )
 
 
+def log_operational_expense_deleted(request, expense: OperationalExpense) -> None:
+    amount = expense.amount
+    log_activity(
+        user=request.user,
+        action=ActivityLog.ACTION_OPERATIONAL_EXPENSE_DELETED,
+        object_type="operational_expense",
+        object_id=expense.pk,
+        object_repr=_operational_repr(expense),
+        summary=f"Διαγραφή λειτουργικού εξόδου ({amount}€)",
+    )
+
+
+def log_operational_income_deleted(request, income: OperationalIncome) -> None:
+    amount = income.amount
+    log_activity(
+        user=request.user,
+        action=ActivityLog.ACTION_OPERATIONAL_INCOME_DELETED,
+        object_type="operational_income",
+        object_id=income.pk,
+        object_repr=_operational_income_repr(income),
+        summary=f"Διαγραφή λειτουργικού εσόδου ({amount}€)",
+    )
+
+
 # --- Πελάτες ---
 
 CUSTOMER_FIELD_LABELS = {

@@ -77,6 +77,7 @@
                                 <th>Κατηγορία</th>
                                 <th class="num">Ποσό</th>
                                 <th>Περιγραφή</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -86,9 +87,13 @@
                                 <td>{{ expense.category.label }}</td>
                                 <td class="num">{{ expense.amount|floatformat:2 }} €</td>
                                 <td>{{ expense.description|default:expense.supplier }}</td>
+                                <td class="col-actions">
+                                    {% url 'projects:operational_expense_delete' expense.pk as expense_delete_url %}
+                                    {% include "projects/_entry_delete_action.html" with delete_url=expense_delete_url delete_item_label="αυτό το λειτουργικό έξοδο" delete_amount=expense.amount %}
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="4" class="empty">
+                            <tr><td colspan="5" class="empty">
                                 {% if filter_active %}Δεν βρέθηκαν εγγραφές{% else %}Καμία καταχώρηση{% endif %}
                             </td></tr>
                             {% endfor %}
@@ -148,6 +153,7 @@
                                 <th>Κατηγορία</th>
                                 <th class="num">Ποσό</th>
                                 <th>Περιγραφή</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -157,9 +163,13 @@
                                 <td>{{ income.category.label }}</td>
                                 <td class="num">{{ income.amount|floatformat:2 }} €</td>
                                 <td>{{ income.description|default:income.source }}</td>
+                                <td class="col-actions">
+                                    {% url 'projects:operational_income_delete' income.pk as income_delete_url %}
+                                    {% include "projects/_entry_delete_action.html" with delete_url=income_delete_url delete_item_label="αυτό το λειτουργικό έσοδο" delete_amount=income.amount %}
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="4" class="empty">
+                            <tr><td colspan="5" class="empty">
                                 {% if filter_active %}Δεν βρέθηκαν εγγραφές{% else %}Καμία καταχώρηση{% endif %}
                             </td></tr>
                             {% endfor %}

@@ -180,6 +180,8 @@ URL_PERMISSION_MAP: dict[str, str | None] = {
     "customer_json": PERM_MANAGE_CUSTOMERS,
     "customer_search": PERM_MANAGE_CUSTOMERS,
     "operational_expenses": PERM_MANAGE_OPERATIONAL,
+    "operational_expense_delete": PERM_MANAGE_OPERATIONAL,
+    "operational_income_delete": PERM_MANAGE_OPERATIONAL,
     "work_calendar": PERM_VIEW_CALENDAR,
     "work_schedule_create": PERM_MANAGE_SCHEDULES,
     "work_schedule_edit": PERM_MANAGE_SCHEDULES,

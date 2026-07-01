@@ -105,6 +105,12 @@
         <div class="stat-label">Σύνολο εργατοωρών</div>
         <div class="stat-value">{{ project.total_hours|floatformat:1 }} ωρ.</div>
     </div>
+    {% if project.profit_per_hour is not None %}
+    <div class="stat-card stat-profit">
+        <div class="stat-label">{% if project.profit >= 0 %}Έσοδο ανά εργατώρα{% else %}Κέρδος ανά εργατώρα{% endif %}</div>
+        <div class="stat-value {% if project.profit_per_hour < 0 %}negative{% endif %}">{{ project.profit_per_hour|floatformat:2 }} €</div>
+    </div>
+    {% endif %}
     {% if project.profit_margin is not None %}
     <div class="stat-card">
         <div class="stat-label">Profit margin</div>

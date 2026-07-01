@@ -339,13 +339,48 @@ h2 { font-size: 1.25rem; margin: 2rem 0 1rem; }
 }
 
 .dashboard-tiles--quick {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+@media (max-width: 639px) {
+    .dashboard-tiles--quick .dashboard-tile--featured {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        aspect-ratio: 1;
+        padding: 0.85rem 0.6rem;
+        gap: 0.55rem;
+    }
+
+    .dashboard-tiles--quick .dashboard-tile__body {
+        align-items: center;
+    }
+
+    .dashboard-tiles--quick .dashboard-tile__label {
+        font-size: 0.82rem;
+        line-height: 1.25;
+    }
+
+    .dashboard-tiles--quick .dashboard-tile__hint {
+        display: none;
+    }
+
+    .dashboard-tiles--quick .dashboard-tile__icon {
+        width: 2.35rem;
+        height: 2.35rem;
+    }
+
+    .dashboard-tiles--quick .dashboard-tile__icon svg {
+        width: 1.15rem;
+        height: 1.15rem;
+    }
 }
 
 @media (min-width: 640px) {
     .dashboard-tiles--quick {
-        grid-template-columns: repeat(2, 1fr);
+        gap: 0.85rem;
     }
 }
 
@@ -1660,27 +1695,57 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
     table-layout: fixed;
 }
 
+.operational-section .table-wrap th {
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: normal;
+    line-height: 1.25;
+    font-size: 0.78rem;
+    font-weight: 600;
+    vertical-align: bottom;
+    hyphens: auto;
+}
+
 .operational-section .table-wrap th:nth-child(1),
 .operational-section .table-wrap td:nth-child(1) {
     width: 24%;
+}
+
+.operational-section .table-wrap td:nth-child(1) {
     white-space: nowrap;
 }
 
 .operational-section .table-wrap th:nth-child(2),
 .operational-section .table-wrap td:nth-child(2) {
-    width: 22%;
+    width: 26%;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .operational-section .table-wrap th:nth-child(3),
 .operational-section .table-wrap td:nth-child(3) {
-    width: 20%;
+    width: 15%;
 }
 
 .operational-section .table-wrap th:nth-child(4),
 .operational-section .table-wrap td:nth-child(4) {
-    width: 34%;
+    width: 25%;
     word-break: break-word;
     overflow-wrap: anywhere;
+}
+
+.operational-section .table-wrap th:nth-child(5),
+.operational-section .table-wrap td:nth-child(5) {
+    width: 11%;
+    min-width: 2.75rem;
+    padding-left: 0.35rem;
+    padding-right: 0.85rem;
+    overflow: visible;
+    white-space: nowrap;
+}
+
+.operational-section .table-wrap td.col-actions {
+    padding-right: 1rem;
 }
 
 @media (max-width: 959px) {
@@ -1707,39 +1772,51 @@ html[data-theme="dark"] .quote-preview table.quote-items-table tfoot td strong {
         white-space: normal;
     }
 
-    .operational-section .table-wrap th:nth-child(1),
-    .operational-section .table-wrap td:nth-child(1) {
-        white-space: normal;
-    }
-
-    .operational-section .two-col {
-        gap: 1.25rem;
-    }
-
     .operational-section .table-wrap th,
     .operational-section .table-wrap td {
-        padding: 0.55rem 0.5rem;
+        padding: 0.55rem 0.4rem;
         font-size: 0.82rem;
     }
 
+    .operational-section .table-wrap th {
+        font-size: 0.72rem;
+        line-height: 1.2;
+    }
+
     .operational-section .table-wrap th:nth-child(1),
     .operational-section .table-wrap td:nth-child(1) {
-        width: 23%;
+        width: 24%;
     }
 
     .operational-section .table-wrap th:nth-child(2),
     .operational-section .table-wrap td:nth-child(2) {
-        width: 24%;
+        width: 26%;
     }
 
     .operational-section .table-wrap th:nth-child(3),
     .operational-section .table-wrap td:nth-child(3) {
-        width: 21%;
+        width: 14%;
     }
 
     .operational-section .table-wrap th:nth-child(4),
     .operational-section .table-wrap td:nth-child(4) {
-        width: 32%;
+        width: 24%;
+    }
+
+    .operational-section .table-wrap th:nth-child(5),
+    .operational-section .table-wrap td:nth-child(5) {
+        width: 13%;
+        min-width: 2.5rem;
+        padding-left: 0.25rem;
+        padding-right: 0.75rem;
+    }
+
+    .operational-section .table-wrap td.col-actions {
+        padding-right: 0.85rem;
+    }
+
+    .operational-section .two-col {
+        gap: 1.25rem;
     }
 
     .category-label {

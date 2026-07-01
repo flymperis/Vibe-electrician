@@ -69,7 +69,9 @@ from .activity_log import (
     log_income_deleted,
     log_income_updated,
     log_operational_expense_created,
+    log_operational_expense_deleted,
     log_operational_income_created,
+    log_operational_income_deleted,
     log_project_created,
     log_project_deleted,
     log_project_status_updated,
@@ -127,6 +129,13 @@ def _project_detail_url(project_pk, request):
     if request.GET:
         url = f"{url}?{request.GET.urlencode()}"
     return url
+
+
+def _redirect_operational_preserve_get(request):
+    url = reverse("projects:operational_expenses")
+    if request.GET:
+        url = f"{url}?{request.GET.urlencode()}"
+    return redirect(url)
 
 
 def _require_project_tracking(request, project):
@@ -872,6 +881,28 @@ def operational_expenses(request):
         ],
     }
     return render(request, "projects/operational.html", context)
+
+
+@owner_required
+def operational_expense_delete(request, pk):
+    expense = get_object_or_404(OperationalExpense, pk=pk)
+    if request.method != "POST":
+        return _redirect_operational_preserve_get(request)
+    log_operational_expense_deleted(request, expense)
+    expense.delete()
+    messages.success(request, "Το λειτουργικό έξοδο διαγράφηκε.")
+    return _redirect_operational_preserve_get(request)
+
+
+@owner_required
+def operational_income_delete(request, pk):
+    income = get_object_or_404(OperationalIncome, pk=pk)
+    if request.method != "POST":
+        return _redirect_operational_preserve_get(request)
+    log_operational_income_deleted(request, income)
+    income.delete()
+    messages.success(request, "Το λειτουργικό έσοδο διαγράφηκε.")
+    return _redirect_operational_preserve_get(request)
 
 
 @login_required

@@ -42,6 +42,16 @@ urlpatterns = [
     ),
     path("exoda-ergou/prosthiiki/", views.add_project_expense, name="add_project_expense"),
     path("litourgika-exoda/", views.operational_expenses, name="operational_expenses"),
+    path(
+        "litourgika-exoda/exodo/<int:pk>/diagrafi/",
+        views.operational_expense_delete,
+        name="operational_expense_delete",
+    ),
+    path(
+        "litourgika-exoda/esodo/<int:pk>/diagrafi/",
+        views.operational_income_delete,
+        name="operational_income_delete",
+    ),
     path("imerologio/", views.work_calendar, name="work_calendar"),
     path("imerologio/neo/", views.work_schedule_create, name="work_schedule_create"),
     path("imerologio/<int:pk>/epexergasia/", views.work_schedule_edit, name="work_schedule_edit"),

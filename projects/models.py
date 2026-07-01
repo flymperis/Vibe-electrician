@@ -258,6 +258,12 @@ class Project(models.Model):
         return total or Decimal("0.00")
 
     @property
+    def profit_per_hour(self) -> Decimal | None:
+        if self.total_hours <= 0:
+            return None
+        return self.profit / self.total_hours
+
+    @property
     def is_pre_job(self) -> bool:
         """Πριν την έναρξη εργασιών — φάση προσφοράς."""
         return self.status == self.STATUS_QUOTE
@@ -887,7 +893,9 @@ class ActivityLog(models.Model):
     ACTION_WORK_SCHEDULE_UPDATED = "work_schedule_updated"
     ACTION_WORK_SCHEDULE_DELETED = "work_schedule_deleted"
     ACTION_OPERATIONAL_EXPENSE_CREATED = "operational_expense_created"
+    ACTION_OPERATIONAL_EXPENSE_DELETED = "operational_expense_deleted"
     ACTION_OPERATIONAL_INCOME_CREATED = "operational_income_created"
+    ACTION_OPERATIONAL_INCOME_DELETED = "operational_income_deleted"
     ACTION_CUSTOMER_CREATED = "customer_created"
     ACTION_CUSTOMER_UPDATED = "customer_updated"
     ACTION_CUSTOMER_DEACTIVATED = "customer_deactivated"
@@ -910,7 +918,9 @@ class ActivityLog(models.Model):
         (ACTION_WORK_SCHEDULE_UPDATED, "Επεξεργασία προγραμματισμένης εργασίας"),
         (ACTION_WORK_SCHEDULE_DELETED, "Διαγραφή προγραμματισμένης εργασίας"),
         (ACTION_OPERATIONAL_EXPENSE_CREATED, "Καταχώρηση λειτουργικού εξόδου"),
+        (ACTION_OPERATIONAL_EXPENSE_DELETED, "Διαγραφή λειτουργικού εξόδου"),
         (ACTION_OPERATIONAL_INCOME_CREATED, "Καταχώρηση λειτουργικού εσόδου"),
+        (ACTION_OPERATIONAL_INCOME_DELETED, "Διαγραφή λειτουργικού εσόδου"),
         (ACTION_CUSTOMER_CREATED, "Δημιουργία πελάτη"),
         (ACTION_CUSTOMER_UPDATED, "Επεξεργασία πελάτη"),
         (ACTION_CUSTOMER_DEACTIVATED, "Απενεργοποίηση πελάτη"),
